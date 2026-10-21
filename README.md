@@ -105,26 +105,49 @@ fuzzy-resolve a brand/salt first (Levenshtein-based, tuned threshold), then the
 key is looked up in the Jan Aushadhi data. Savings use the **strip-printed MRP**
 when available (exact), otherwise a clearly-labelled **approx** brand price.
 
+## Find a Kendra (locator)
+
+Every result links to **"Find nearest Jan Aushadhi Kendra"**, and the footer has
+a persistent **"Kendras near me"**. The locator:
+
+- Offers **"Use my location"** (geolocation, explained before the prompt and
+  never stored) **and** a **PIN code** fallback — if location is denied it moves
+  you to the PIN field, no dead end.
+- Shows a **list first** (works with no map): each Kendra has its address,
+  distance, **Directions** (Google Maps) and **Call** (when a phone is known),
+  with an "Approx location" tag where the coordinate is approximate.
+- Loads an optional **Mapbox** map **lazily** (only when you open the Map tab,
+  to save map loads), with clustering, a "you are here" marker, and list ↔
+  marker sync. If no Mapbox token is set or the map fails to load, the map tab
+  is simply hidden and the list keeps working.
+
+The locator logic (`locator.js`) is pure and covered by `tests/locator.test.mjs`.
+
 ## Project layout
 
 | Path | What |
 |---|---|
 | `index.html`, `style.css`, `app.js`, `i18n.js` | Static front end (no framework) |
 | `match.js` | Matching engine (UMD — runs in browser **and** Node tests) |
+| `locator.js` | Kendra distance + PIN logic (UMD, pure) |
+| `config.js` | Public runtime config (Mapbox token — no secrets) |
 | `data/jan_aushadhi.json` | Jan Aushadhi generics (curated PMBI snapshot) |
 | `data/brands.json` | ~45 common Indian brands → salt + strength |
+| `data/kendras.json` | Lucknow Jan Aushadhi Kendras (demo snapshot) |
 | `packages/api/read-strip/` | Gemma 4 serverless function |
 | `scripts/validate-data.js` | Dataset integrity check (CI) |
-| `tests/match.test.js` | Matching + golden-rule tests (`node --test`) |
+| `scripts/build-kendras.py` | Reproducible Kendra geocoding pipeline (Nominatim) |
+| `tests/match.test.js`, `tests/locator.test.mjs` | Tests (`node --test`) |
 | `project.yml`, `.do/app.yaml` | DigitalOcean deploy config |
+| `docs/` | PRD, design system, UX copy, SEO, UI audit |
 
 ## Develop & test
 
 No dependencies to install — tests use Node's built-in runner.
 
 ```bash
-npm run validate-data   # dataset is clean: every entry has salt, strength, price
-npm test                # matching, savings math, honest no-match, Gemma boundary
+npm run validate-data   # dataset clean: salt/strength/price; Kendras in Lucknow bbox
+npm test                # matching, savings, Gemma boundary, locator (distance/PIN)
 npm run check           # both of the above
 ```
 
@@ -136,7 +159,17 @@ npm run check           # both of the above
    or App Platform deploys it from the same spec.
 3. **Secret** — set `GEMINI_API_KEY` as an encrypted env var in the DO
    dashboard (never in the repo). Get a free key from Google AI Studio.
-4. Replace the placeholder URLs (`dawadekho.ondigitalocean.app`) in
+4. **Mapbox token (optional, for the Kendra map)** — put a **public** token
+   (`pk.…`) in [`config.js`](config.js) as `MAPBOX_TOKEN`. Restrict it by URL
+   to your app domain and `localhost`, with only the map read scopes
+   (styles/fonts/sprites/tiles). **Never** use a secret token (`sk.…`) in the
+   browser. Leave it empty to run the locator in list-only mode. Mapbox's free
+   tier covers 50,000 web map loads/month, and the map loads lazily.
+5. **Rebuild the Kendra data (optional)** — run
+   `pip install pdfplumber requests && python3 scripts/build-kendras.py --pdf-url <url> --district Lucknow`
+   to regenerate `data/kendras.json` from the official PDF with live Nominatim
+   geocoding.
+6. Replace the placeholder URLs (`dawadekho.ondigitalocean.app`) in
    `index.html`, `robots.txt`, `sitemap.xml` and this README with your real URL.
 
 ## Data & honesty
@@ -149,6 +182,13 @@ npm run check           # both of the above
   any real-world use.
 - Brand `approx_mrp` values are typical retail prices, **always labelled
   "approx"** in the UI; the real branded price is the MRP on your own strip.
+- **Kendra data:** records come from the all-India Jan Aushadhi Kendra list PDF
+  (PMBI, dated **Oct 2025**). `data/kendras.json` ships a **curated ~35-Kendra
+  Lucknow demo** with approximate area coordinates (`approx_location: true`,
+  phones left `null`) so the locator works out of the box. Run
+  `scripts/build-kendras.py` to regenerate the authoritative, geocoded version.
+  Coordinates are **© OpenStreetMap contributors (ODbL)**, geocoded via
+  Nominatim; Mapbox is used only to *display* the map, never to store geocodes.
 - **Not medical advice.** Every result says: *"Information only. Confirm with
   your doctor or pharmacist before switching."*
 
@@ -166,7 +206,12 @@ screen readers ("You save 15 rupees, 52 percent").
 - **[DigitalOcean App Platform & Functions](https://www.digitalocean.com/products/app-platform)** — free static hosting + serverless.
 - **[PMBI / Jan Aushadhi](https://janaushadhi.gov.in/)** — the generic medicine data this is all built on.
 - **[Google Fonts](https://fonts.google.com/)** — Mukta (Devanagari + Latin) and IBM Plex Mono (receipt figures).
-- Matching is a small hand-written engine (no Fuse.js dependency needed) so the test suite runs with **zero installs**.
+- **[Mapbox GL JS](https://www.mapbox.com/)** — the Kendra map. Note: Mapbox GL
+  JS v2+ is under the **Mapbox Terms of Service** (not an OSI licence); it is a
+  runtime dependency loaded from Mapbox's CDN and is **not** redistributed in
+  this repo. The DawaDekho application code itself stays **MIT**.
+- **[OpenStreetMap](https://www.openstreetmap.org/copyright) / [Nominatim](https://nominatim.org/)** — Kendra coordinates (geocoded data), **© OpenStreetMap contributors, ODbL**.
+- Matching and locator maths are small hand-written engines (no Fuse.js) so the test suite runs with **zero installs**.
 - Built with the help of **AI coding assistants** (Claude) during the hackathon build window.
 
 ## License
