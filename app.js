@@ -736,9 +736,214 @@
     }
   }
 
-  // Tabs are wired by the map module (see initMap). Until then this is a no-op
-  // and the Map tab stays hidden, so the list works on its own.
-  function wireKendraTabs() { if (state.wireKendraTabs) state.wireKendraTabs(); }
+  // ---- Lazy Mapbox map (enhancement; the list always works without it) ----
+
+  var mapState = { map: null, loading: null, failed: false, youMarker: null, popup: null, ready: false };
+
+  function mapToken() { return (window.DAWA_CONFIG && window.DAWA_CONFIG.MAPBOX_TOKEN) || ""; }
+  function mapVersion() { return (window.DAWA_CONFIG && window.DAWA_CONFIG.MAP_VERSION) || "3.9.1"; }
+  // We offer the Map tab only when a token is configured and loading hasn't failed.
+  function mapAvailable() { return !!mapToken() && !mapState.failed; }
+
+  function cssToken(name, fallback) {
+    try {
+      var v = getComputedStyle(document.body).getPropertyValue(name).trim();
+      return v || fallback;
+    } catch (e) { return fallback; }
+  }
+
+  function loadMapboxLib() {
+    if (window.mapboxgl) return Promise.resolve(window.mapboxgl);
+    if (mapState.loading) return mapState.loading;
+    mapState.loading = new Promise(function (resolve, reject) {
+      var v = mapVersion();
+      var base = "https://api.mapbox.com/mapbox-gl-js/v" + v + "/mapbox-gl";
+      var css = document.createElement("link");
+      css.rel = "stylesheet"; css.href = base + ".css";
+      document.head.appendChild(css);
+      var s = document.createElement("script");
+      s.src = base + ".js"; s.async = true;
+      s.onload = function () { window.mapboxgl ? resolve(window.mapboxgl) : reject(new Error("mapbox-missing")); };
+      s.onerror = function () { reject(new Error("mapbox-load-failed")); };
+      document.head.appendChild(s);
+      // Safety timeout: if the CDN is blocked, don't hang the Map tab.
+      setTimeout(function () { if (!window.mapboxgl) reject(new Error("mapbox-timeout")); }, 8000);
+    });
+    return mapState.loading;
+  }
+
+  function mapStyleUrl() {
+    return effectiveTheme() === "dark" ? "mapbox://styles/mapbox/dark-v11" : "mapbox://styles/mapbox/light-v11";
+  }
+
+  function kendraGeojson(list) {
+    return {
+      type: "FeatureCollection",
+      features: list.map(function (k, i) {
+        return {
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [k.lng, k.lat] },
+          properties: { idx: i, name: k.name },
+        };
+      }),
+    };
+  }
+
+  function setupMapLayers(mapboxgl, list, origin) {
+    var map = mapState.map;
+    var save = cssToken("--save", "#0B6E46");
+    var data = kendraGeojson(list);
+
+    if (map.getSource("kendras")) {
+      map.getSource("kendras").setData(data);
+    } else {
+      map.addSource("kendras", { type: "geojson", data: data, cluster: true, clusterRadius: 44, clusterMaxZoom: 13 });
+      map.addLayer({
+        id: "clusters", type: "circle", source: "kendras", filter: ["has", "point_count"],
+        paint: { "circle-color": save, "circle-opacity": 0.9, "circle-radius": ["step", ["get", "point_count"], 16, 5, 22, 10, 28] },
+      });
+      map.addLayer({
+        id: "cluster-count", type: "symbol", source: "kendras", filter: ["has", "point_count"],
+        layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 13 }, paint: { "text-color": "#ffffff" },
+      });
+      map.addLayer({
+        id: "points", type: "circle", source: "kendras", filter: ["!", ["has", "point_count"]],
+        paint: { "circle-color": save, "circle-radius": 8, "circle-stroke-width": 2, "circle-stroke-color": "#ffffff" },
+      });
+      map.on("click", "clusters", function (e) {
+        var f = map.queryRenderedFeatures(e.point, { layers: ["clusters"] })[0];
+        if (!f) return;
+        map.getSource("kendras").getClusterExpansionZoom(f.properties.cluster_id, function (err, zoom) {
+          if (err) return;
+          map.easeTo({ center: f.geometry.coordinates, zoom: zoom });
+        });
+      });
+      map.on("click", "points", function (e) { openPopupByIdx(e.features[0].properties.idx); });
+      map.on("mouseenter", "points", function () { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "points", function () { map.getCanvas().style.cursor = ""; });
+    }
+
+    // "You are here"
+    if (origin && mapState._mapboxgl) {
+      if (mapState.youMarker) mapState.youMarker.remove();
+      var pin = document.createElement("div");
+      pin.className = "mb-pin you"; pin.setAttribute("aria-hidden", "true");
+      mapState.youMarker = new mapState._mapboxgl.Marker({ element: pin }).setLngLat([origin.lng, origin.lat]).addTo(map);
+    }
+
+    // Fit to the user + the nearest Kendras.
+    var b = new mapState._mapboxgl.LngLatBounds();
+    if (origin) b.extend([origin.lng, origin.lat]);
+    list.forEach(function (k) { b.extend([k.lng, k.lat]); });
+    if (!b.isEmpty()) map.fitBounds(b, { padding: 48, maxZoom: 14, duration: prefersReducedMotion() ? 0 : 500 });
+  }
+
+  function openPopupByIdx(idx) {
+    var k = state._kendraList && state._kendraList[idx];
+    if (!k || !mapState.map || !mapState._mapboxgl) return;
+    var dist = k.distanceKmRounded != null ? t("kendra.distance", { km: k.distanceKmRounded }) : "";
+    var dir = "https://www.google.com/maps/dir/?api=1&destination=" + k.lat + "," + k.lng;
+    var div = document.createElement("div");
+    div.appendChild(el("strong", { text: k.name }));
+    if (dist) { div.appendChild(document.createElement("br")); div.appendChild(document.createTextNode(dist)); }
+    div.appendChild(document.createElement("br"));
+    div.appendChild(el("a", { href: dir, target: "_blank", rel: "noopener noreferrer", text: t("kendra.directions") }));
+    if (mapState.popup) mapState.popup.remove();
+    mapState.popup = new mapState._mapboxgl.Popup({ offset: 14 }).setLngLat([k.lng, k.lat]).setDOMContent(div).addTo(mapState.map);
+    highlightCard(idx);
+  }
+
+  function highlightCard(idx) {
+    $all(".kendra-card").forEach(function (c) { c.classList.remove("is-active"); });
+    var card = document.getElementById("kcard-" + idx);
+    if (card) { card.classList.add("is-active"); card.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" }); }
+  }
+
+  function ensureMap(list, origin) {
+    return loadMapboxLib().then(function (mapboxgl) {
+      mapState._mapboxgl = mapboxgl;
+      mapboxgl.accessToken = mapToken();
+      var container = $("#kendraMap");
+      if (!mapState.map) {
+        mapState.map = new mapboxgl.Map({
+          container: container, style: mapStyleUrl(),
+          center: origin ? [origin.lng, origin.lat] : [80.9462, 26.8508], zoom: 11,
+        });
+        mapState.map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        mapState.map.addControl(new mapboxgl.GeolocateControl({ positionOptions: { enableHighAccuracy: false }, trackUserLocation: false }), "top-right");
+        return new Promise(function (resolve) {
+          mapState.map.on("load", function () {
+            mapState.ready = true;
+            setupMapLayers(mapboxgl, list, origin);
+            resolve(mapState.map);
+          });
+          mapState.map.on("error", function () {});
+        });
+      }
+      setupMapLayers(mapboxgl, list, origin);
+      return mapState.map;
+    });
+  }
+
+  function failMap() {
+    mapState.failed = true;
+    var tabs = $("#kendraTabs");
+    if (tabs) tabs.hidden = true;
+    showListTab();
+  }
+
+  // ---- tabs ----
+
+  function setKTab(which) {
+    var tl = $("#tabList"), tm = $("#tabMap");
+    if (tl) tl.setAttribute("aria-selected", which === "list" ? "true" : "false");
+    if (tm) tm.setAttribute("aria-selected", which === "map" ? "true" : "false");
+  }
+
+  function showListTab() {
+    setKTab("list");
+    var l = $("#kendraList"), m = $("#kendraMap");
+    if (l) l.hidden = false;
+    if (m) m.hidden = true;
+  }
+
+  function showMapTab() {
+    setKTab("map");
+    var l = $("#kendraList"), m = $("#kendraMap");
+    if (l) l.hidden = true;
+    if (m) m.hidden = false;
+    return ensureMap(state._kendraList || [], state._kendraOrigin)
+      .then(function () { if (mapState.map) mapState.map.resize(); })
+      .catch(function () { failMap(); });
+  }
+
+  function wireKendraTabs() {
+    var tl = $("#tabList"), tm = $("#tabMap");
+    if (tl) tl.addEventListener("click", showListTab);
+    if (tm) tm.addEventListener("click", showMapTab);
+    // expose hooks used by the locator section
+    state.mapAvailable = mapAvailable;
+    state.updateMap = function (list, origin) {
+      // only push data if the map is already built/visible
+      if (mapState.map && mapState.ready && !$("#kendraMap").hidden) setupMapLayers(mapState._mapboxgl, list, origin);
+    };
+    state.focusMapMarker = function (idx) {
+      if (!mapAvailable()) return;
+      showMapTab().then(function () {
+        if (mapState.map && state._kendraList && state._kendraList[idx]) {
+          var k = state._kendraList[idx];
+          mapState.map.flyTo({ center: [k.lng, k.lat], zoom: 14, duration: prefersReducedMotion() ? 0 : 500 });
+          openPopupByIdx(idx);
+        }
+      });
+    };
+    state._mapThemeSync = function () {
+      if (!mapState.map || !mapState.ready) return;
+      var list = state._kendraList || [], origin = state._kendraOrigin;
+      mapState.map.once("style.load", function () { mapState.ready = true; setupMapLayers(mapState._mapboxgl, list, origin); });
+      mapState.map.setStyle(mapStyleUrl());
+    };
+  }
 
   // ---- nav helpers --------------------------------------------------------
 
