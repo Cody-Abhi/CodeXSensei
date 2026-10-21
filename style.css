@@ -84,6 +84,17 @@ header.app {
 }
 .wordmark .dot { width: 12px; height: 12px; border-radius: 3px; background: var(--saffron); display: inline-block; }
 
+.header-controls { display: inline-flex; align-items: center; gap: var(--s2); }
+
+/* Theme toggle — 48px icon button */
+.icon-btn {
+  width: 48px; height: 48px; flex: none;
+  border: 2px solid var(--line); border-radius: var(--r-md);
+  background: var(--card); color: var(--ink); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.icon-btn svg { width: 22px; height: 22px; }
+
 /* Language toggle — 48px segmented button */
 .langtoggle {
   display: inline-flex; border: 2px solid var(--line); border-radius: var(--r-md);

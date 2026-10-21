@@ -14,6 +14,7 @@
   var KENDRA_URL = "https://janaushadhi.gov.in/StoreSearch.aspx";
   var SUGAM_APP_URL = "https://play.google.com/store/apps/details?id=in.gov.janaushadhi.sugam";
   var LANG_KEY = "dawadekho.lang";
+  var THEME_KEY = "dawadekho.theme"; // "light" | "dark" | unset (= follow system)
 
   var state = {
     lang: "en",
@@ -66,6 +67,7 @@
     if (langGroup) langGroup.setAttribute("aria-label", t("lang.toggle.aria"));
     document.documentElement.lang = state.lang;
     $("#aboutDate") && ($("#aboutDate").textContent = state.dataDate);
+    if (typeof updateThemeButton === "function") updateThemeButton();
   }
 
   function setLang(lang) {
@@ -85,6 +87,60 @@
     try { saved = localStorage.getItem(LANG_KEY); } catch (e) {}
     var fromUrl = new URLSearchParams(location.search).get("lang");
     setLang(fromUrl || saved || "en");
+  }
+
+  // ---- theme (follows system; manual toggle overrides) --------------------
+
+  function storedTheme() {
+    try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+  }
+
+  function systemDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  function effectiveTheme() {
+    var s = storedTheme();
+    if (s === "light" || s === "dark") return s;
+    return systemDark() ? "dark" : "light";
+  }
+
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>';
+
+  function updateThemeButton() {
+    var btn = $("#themeToggle");
+    if (!btn) return;
+    var eff = effectiveTheme();
+    // Show the icon of the mode you'd switch TO.
+    btn.innerHTML = eff === "dark" ? SUN : MOON;
+    btn.setAttribute("aria-pressed", eff === "dark" ? "true" : "false");
+    btn.setAttribute("aria-label", t(eff === "dark" ? "theme.toLight" : "theme.toDark"));
+  }
+
+  function applyTheme() {
+    var s = storedTheme();
+    if (s === "light" || s === "dark") document.documentElement.setAttribute("data-theme", s);
+    else document.documentElement.removeAttribute("data-theme");
+    updateThemeButton();
+    if (state._mapThemeSync) state._mapThemeSync(effectiveTheme());
+  }
+
+  function toggleTheme() {
+    var next = effectiveTheme() === "dark" ? "light" : "dark";
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    applyTheme();
+  }
+
+  function initTheme() {
+    applyTheme();
+    // If the user hasn't overridden, follow live system changes.
+    if (window.matchMedia) {
+      var mq = window.matchMedia("(prefers-color-scheme: dark)");
+      var handler = function () { if (!storedTheme()) applyTheme(); };
+      if (mq.addEventListener) mq.addEventListener("change", handler);
+      else if (mq.addListener) mq.addListener(handler);
+    }
   }
 
   // ---- navigation ---------------------------------------------------------
@@ -558,6 +614,10 @@
       b.addEventListener("click", function () { setLang(b.getAttribute("data-lang")); });
     });
 
+    // theme
+    var themeBtn = $("#themeToggle");
+    if (themeBtn) themeBtn.addEventListener("click", toggleTheme);
+
     // home actions
     $("#goPhoto").addEventListener("click", goPhoto);
     $("#goType").addEventListener("click", goType);
@@ -640,6 +700,7 @@
 
   function init() {
     initLang();
+    initTheme();
     wire();
     loadData();
   }

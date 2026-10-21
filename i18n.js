@@ -14,6 +14,8 @@
       "app.name": "DawaDekho",
       "app.tagline": "See the medicine. See the price. Before you pay.",
       "lang.toggle.aria": "Change language",
+      "theme.toDark": "Switch to dark mode",
+      "theme.toLight": "Switch to light mode",
       "offline.banner": "You're offline. Typed search still works.",
 
       "home.title": "Is there a cheaper version of your medicine?",
@@ -86,6 +88,8 @@
       "app.name": "दवा देखो",
       "app.tagline": "दवा देखो, दाम देखो — पैसे देने से पहले।",
       "lang.toggle.aria": "भाषा बदलें",
+      "theme.toDark": "डार्क मोड चालू करें",
+      "theme.toLight": "लाइट मोड चालू करें",
       "offline.banner": "इंटरनेट नहीं है। नाम लिखकर खोज अब भी चलेगी।",
 
       "home.title": "क्या आपकी दवा सस्ते में मिल सकती है?",
