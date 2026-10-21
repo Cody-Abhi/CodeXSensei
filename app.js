@@ -298,6 +298,13 @@
     $("#cStrength").value = gemma.strength || "";
     $("#cMrp").value = gemma.mrp_printed != null ? gemma.mrp_printed : "";
     state._gemmaForm = gemma;
+    // Show the strip thumbnail beside the fields so the user can cross-check.
+    var thumb = $("#confirmThumb");
+    if (thumb) {
+      var src = $("#photoPreview") && $("#photoPreview")._url;
+      if (src) { thumb.src = src; thumb.hidden = false; thumb.alt = t("photo.tip"); }
+      else thumb.hidden = true;
+    }
     show("confirm", { focus: "cBrand" });
   }
 

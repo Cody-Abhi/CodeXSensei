@@ -205,7 +205,12 @@ label.field-label { display: block; font-weight: 700; margin-bottom: var(--s2); 
 /* Confirm card */
 .confirm-card, .result-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s5) var(--s4); margin: var(--s5) 0; }
 .confirm-card h2 { margin: 0 0 var(--s1); font-size: var(--text-lg); }
-.confirm-card .lead { color: var(--ink-muted); margin: 0 0 var(--s4); }
+.confirm-card .lead { color: var(--ink-muted); margin: 0; }
+.confirm-head { display: flex; gap: var(--s3); align-items: flex-start; margin-bottom: var(--s4); }
+.confirm-head > div { flex: 1; }
+.confirm-thumb { flex: none; width: 88px; height: 88px; object-fit: cover; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--paper); }
+.confirm-actions { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s2); }
+.confirm-actions .btn { flex: 1 1 150px; }
 .formrow { margin-bottom: var(--s4); }
 .formrow label { display: block; font-weight: 700; margin-bottom: var(--s1); }
 .formrow input {
