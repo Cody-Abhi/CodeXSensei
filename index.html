@@ -196,6 +196,53 @@
           <h2 id="resultHeading" class="sr-only">Result</h2>
           <div id="resultHost"></div>
         </section>
+
+        <!-- KENDRA LOCATOR -->
+        <section id="view-kendra" class="view" aria-labelledby="kendraHeading" hidden>
+          <div class="kendra-panel">
+            <button type="button" class="btn-link back" id="kendraBack">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+              <span data-i18n="search.back">Back</span>
+            </button>
+            <h2 id="kendraHeading" data-i18n="kendra.title">Jan Aushadhi Kendras near you</h2>
+
+            <div class="kendra-controls">
+              <button type="button" id="useLocation" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
+                <span data-i18n="kendra.useLocation">Use my location</span>
+              </button>
+              <p class="loc-why" data-i18n="kendra.locationWhy">We use your location only to sort nearby Kendras. It is not saved.</p>
+              <form id="pinForm" class="pin-form" novalidate>
+                <label for="pinInput" class="field-label" data-i18n="kendra.pinLabel">Or enter PIN code</label>
+                <div class="pin-row">
+                  <input type="text" id="pinInput" class="field code" inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="226001">
+                  <button type="submit" class="btn btn-outline" data-i18n="kendra.pinGo">Find</button>
+                </div>
+              </form>
+              <p id="kendraMsg" class="kendra-msg" role="status" aria-live="polite"></p>
+            </div>
+
+            <!-- Tabs (Map tab revealed only when Mapbox is available) -->
+            <div class="kendra-tabs" id="kendraTabs" role="tablist" hidden>
+              <button type="button" class="ktab" id="tabList" role="tab" aria-selected="true" data-i18n="kendra.tabList">List</button>
+              <button type="button" class="ktab" id="tabMap" role="tab" aria-selected="false" data-i18n="kendra.tabMap">Map</button>
+            </div>
+
+            <div id="kendraList" class="kendra-list" role="tabpanel" aria-live="polite"></div>
+            <div id="kendraMap" class="kendra-map" role="region" aria-label="Map of nearby Kendras" hidden></div>
+
+            <div class="kendra-foot">
+              <p class="kendra-check">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+                <span data-i18n="kendra.checkFirst">Check opening hours and stock with the Kendra before you go.</span>
+              </p>
+              <div class="action-row">
+                <a class="btn btn-outline btn-compact" href="https://janaushadhi.gov.in/locate-kendra" target="_blank" rel="noopener noreferrer" data-i18n="kendra.official">Official Kendra locator</a>
+                <a class="btn btn-outline btn-compact" href="https://play.google.com/store/apps/details?id=in.gov.janaushadhi.sugam" target="_blank" rel="noopener noreferrer" data-i18n="result.app">Get the official Janaushadhi Sugam app</a>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </main>
@@ -211,6 +258,12 @@
   </nav>
 
   <footer class="app wrap">
+    <p>
+      <button type="button" id="footerKendra" class="btn-link footer-kendra">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <span data-i18n="kendra.near">Kendras near me</span>
+      </button>
+    </p>
     <p data-i18n="app.tagline">See the medicine. See the price. Before you pay.</p>
     <p>
       <a href="https://janaushadhi.gov.in/" target="_blank" rel="noopener noreferrer">Jan Aushadhi</a> ·
@@ -227,6 +280,7 @@
 
   <script src="i18n.js"></script>
   <script src="match.js"></script>
+  <script src="locator.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

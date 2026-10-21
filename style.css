@@ -42,6 +42,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+/* The hidden attribute must win over component display rules (tabs, map, thumb) */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -302,6 +304,43 @@ label.field-label { display: block; font-weight: 700; margin-bottom: var(--s2); 
 .sk-band { height: 72px; background: var(--save-soft); border-radius: var(--r-md); margin: var(--s4) 0; animation: pulse 1.2s ease-in-out infinite; }
 .loading-text { color: var(--ink-muted); display: flex; align-items: center; gap: var(--s2); }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+/* ---- Kendra locator panel ---- */
+.kendra-panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s5) var(--s4); margin: var(--s5) 0; }
+.kendra-panel h2 { margin: 0 0 var(--s4); font-size: var(--text-lg); }
+.kendra-controls { margin-bottom: var(--s4); }
+.loc-why { color: var(--ink-muted); font-size: var(--text-sm); margin: var(--s2) 0 var(--s4); }
+.pin-form .field-label { margin-bottom: var(--s2); }
+.pin-row { display: flex; gap: var(--s2); }
+.pin-row .field { flex: 1; min-height: 56px; }
+.pin-row .btn { width: auto; flex: none; min-height: 56px; padding: 0 var(--s5); }
+.kendra-msg { color: var(--warn-ink); font-size: var(--text-sm); margin: var(--s2) 0 0; min-height: 1.2em; }
+.kendra-msg:empty { margin: 0; min-height: 0; }
+
+.kendra-tabs { display: flex; gap: var(--s1); border-bottom: 2px solid var(--line); margin: var(--s4) 0 var(--s3); }
+.ktab { min-height: 48px; padding: 0 var(--s4); border: 0; background: none; color: var(--ink-muted); font-family: var(--font-ui); font-size: var(--text-base); font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+.ktab[aria-selected="true"] { color: var(--save); border-bottom-color: var(--save); }
+
+.kendra-list { display: flex; flex-direction: column; gap: var(--s2); }
+.kendra-card { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s3); padding: var(--s3) var(--s4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); }
+.kendra-card.is-active { border-color: var(--save); box-shadow: 0 0 0 2px var(--save-soft); }
+.kendra-card .k-main { flex: 1 1 60%; min-width: 0; }
+.k-name { margin: 0 0 2px; font-size: var(--text-base); font-weight: 700; }
+.k-addr { margin: 0 0 var(--s1); color: var(--ink-muted); font-size: var(--text-sm); }
+.k-dist { margin: 0; font-family: var(--font-num); font-weight: 600; color: var(--save); font-size: var(--text-sm); }
+.k-actions { display: flex; gap: var(--s2); align-items: center; flex: 0 0 auto; }
+.k-actions .btn { width: auto; min-height: 48px; padding: 0 var(--s4); font-size: var(--text-sm); }
+
+.kendra-map { height: 60vh; min-height: 320px; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--line); }
+.kendra-foot { margin-top: var(--s5); border-top: 2px dashed var(--line); padding-top: var(--s4); }
+.kendra-check { display: flex; gap: var(--s2); align-items: flex-start; color: var(--ink-muted); font-size: var(--text-sm); margin: 0 0 var(--s3); }
+.kendra-check svg { flex: none; }
+.footer-kendra { padding-left: 0; }
+
+/* Mapbox marker pins */
+.mb-pin { width: 20px; height: 20px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid var(--card); box-shadow: 0 1px 3px rgb(0 0 0 / .3); cursor: pointer; }
+.mb-pin.kendra { background: var(--save); }
+.mb-pin.you { background: var(--focus); width: 18px; height: 18px; border-radius: 50%; transform: none; }
 
 /* Offline banner */
 .offline-banner {

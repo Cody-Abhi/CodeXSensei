@@ -7,6 +7,7 @@
 
   var I18N = window.DawaI18N;
   var M = window.DawaMatch;
+  var L = window.DawaLocator;
 
   var API_ENDPOINT = "/api/read-strip";
   var PHOTO_TIMEOUT_MS = 15000;
@@ -80,6 +81,7 @@
     applyI18n();
     // re-render current result if any
     if (state._lastResult && isResultOpen()) renderResult(state._lastResult);
+    if (isStageOpen("kendra")) renderKendraResults();
   }
 
   function initLang() {
@@ -177,12 +179,20 @@
     window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
   }
 
-  function openResult() {
-    var r = document.getElementById("view-result");
-    r.hidden = false;
-    r.classList.add("active");
+  // The result column can show one of two "stages": the result or the Kendra
+  // locator. They are mutually exclusive and sit in the right column on desktop.
+  var STAGES = ["result", "kendra"];
+
+  function openStage(name) {
+    STAGES.forEach(function (s) {
+      var n = document.getElementById("view-" + s);
+      if (!n) return;
+      var on = s === name;
+      n.classList.toggle("active", on);
+      n.hidden = !on;
+    });
     if (!isWide()) {
-      // Phone: result replaces the input column.
+      // Phone: the stage replaces the input column.
       INPUT_VIEWS.forEach(function (v) {
         var node = document.getElementById("view-" + v);
         node.classList.remove("active");
@@ -194,11 +204,18 @@
     window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
   }
 
+  function openResult() { openStage("result"); }
+
   function closeResult() {
-    var r = document.getElementById("view-result");
-    if (!r) return;
-    r.hidden = true;
-    r.classList.remove("active");
+    STAGES.forEach(function (s) {
+      var n = document.getElementById("view-" + s);
+      if (n) { n.hidden = true; n.classList.remove("active"); }
+    });
+  }
+
+  function isStageOpen(name) {
+    var n = document.getElementById("view-" + name);
+    return n && n.classList.contains("active");
   }
 
   // ---- typed search -------------------------------------------------------
@@ -437,7 +454,7 @@
       el("p", { text: t("nomatch.body") }),
       el("div", { class: "state-actions" }, [
         el("button", { class: "btn btn-outline btn-sm", onclick: function () { goType(); } }, [t("nomatch.retry")]),
-        linkButton(KENDRA_URL, t("result.kendra")),
+        el("button", { class: "btn btn-primary btn-sm", onclick: function () { openKendra(); } }, [t("result.kendra")]),
       ]),
     ]);
   }
@@ -501,7 +518,7 @@
 
     // actions: primary Kendra (full width), then a compact secondary row
     var actions = el("div", { class: "result-actions" });
-    actions.appendChild(linkButton(KENDRA_URL, t("result.kendra"), true));
+    actions.appendChild(el("button", { class: "btn btn-primary", onclick: function () { openKendra(); } }, [t("result.kendra")]));
 
     var secondary = el("div", { class: "action-row" });
     secondary.appendChild(linkButton(SUGAM_APP_URL, t("result.app"), false, true));
@@ -601,10 +618,133 @@
     if (net) net.style.color = navigator.onLine ? "" : "var(--danger)";
   }
 
+  // ---- Kendra locator -----------------------------------------------------
+
+  var GEO_TIMEOUT_MS = 10000;
+  var OFFICIAL_LOCATOR = "https://janaushadhi.gov.in/locate-kendra";
+
+  function openKendra() {
+    openStage("kendra");
+    setKendraMsg("");
+    var btn = $("#useLocation");
+    if (btn) btn.focus();
+    // If we already have results (e.g. re-opening), keep them.
+    if (!state._kendraList) $("#kendraList").innerHTML = "";
+    if (state.mapAvailable && state.mapAvailable()) $("#kendraTabs").hidden = false;
+  }
+
+  function setKendraMsg(text) {
+    var m = $("#kendraMsg");
+    if (m) m.textContent = text || "";
+  }
+
+  function useLocation() {
+    if (!navigator.geolocation) { onGeoError(); return; }
+    setKendraMsg(t("kendra.locating"));
+    navigator.geolocation.getCurrentPosition(
+      function (pos) {
+        setKendraMsg("");
+        var origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        showKendraResults(L.nearest(state.kendras, origin, 10), origin, false);
+      },
+      function () { onGeoError(); },
+      { enableHighAccuracy: false, timeout: GEO_TIMEOUT_MS, maximumAge: 60000 }
+    );
+  }
+
+  function onGeoError() {
+    // No dead end: send the user to the PIN field with a friendly message.
+    setKendraMsg(t("kendra.denied"));
+    var pin = $("#pinInput");
+    if (pin) pin.focus();
+  }
+
+  function submitPin(e) {
+    if (e) e.preventDefault();
+    var pin = ($("#pinInput").value || "").trim();
+    if (!L.isValidPin(pin)) { setKendraMsg(t("kendra.none")); return; }
+    var list = L.byPin(state.kendras, pin, 10);
+    if (!list.length) { setKendraMsg(t("kendra.none")); clearKendraResults(); return; }
+    setKendraMsg("");
+    // Origin for the map: the centroid of the exact-PIN matches.
+    var exact = state.kendras.filter(function (k) { return String(k.pin) === pin; });
+    var origin = L.centroid(exact);
+    showKendraResults(list, origin, true);
+  }
+
+  // Keep the current list + origin so we can re-render (language change, tabs).
+  function showKendraResults(list, origin, fromPin) {
+    state._kendraList = list;
+    state._kendraOrigin = origin;
+    state._kendraFromPin = fromPin;
+    renderKendraResults();
+    if (state.mapAvailable && state.mapAvailable()) {
+      $("#kendraTabs").hidden = false;
+      if (state.updateMap) state.updateMap(list, origin);
+    }
+  }
+
+  function clearKendraResults() {
+    state._kendraList = null; state._kendraOrigin = null;
+    $("#kendraList").innerHTML = "";
+    $("#kendraTabs").hidden = true;
+  }
+
+  function renderKendraResults() {
+    if (!state._kendraList) return;
+    renderKendraList(state._kendraList);
+  }
+
+  function renderKendraList(list) {
+    var host = $("#kendraList");
+    host.innerHTML = "";
+    list.forEach(function (k, i) {
+      var addr = el("p", { class: "k-addr" }, [k.address]);
+      if (k.approx_location) addr.appendChild(el("span", { class: "approx-tag", text: t("kendra.approx") }));
+      var main = el("div", { class: "k-main" }, [
+        el("h3", { class: "k-name", text: k.name }),
+        addr,
+      ]);
+      if (k.distanceKmRounded != null) {
+        main.appendChild(el("p", { class: "k-dist", text: t("kendra.distance", { km: k.distanceKmRounded }) }));
+      }
+      var actions = el("div", { class: "k-actions" });
+      if (k.phone) {
+        actions.appendChild(el("a", { class: "btn btn-outline", href: "tel:" + k.phone }, [t("kendra.call")]));
+      }
+      actions.appendChild(el("a", {
+        class: "btn btn-primary",
+        href: "https://www.google.com/maps/dir/?api=1&destination=" + k.lat + "," + k.lng,
+        target: "_blank", rel: "noopener noreferrer",
+      }, [t("kendra.directions")]));
+
+      var card = el("div", { class: "kendra-card", id: "kcard-" + i, "data-idx": i }, [main, actions]);
+      card.addEventListener("click", function (ev) {
+        if (ev.target.closest("a")) return; // let Call/Directions work
+        if (state.focusMapMarker) state.focusMapMarker(i);
+      });
+      host.appendChild(card);
+    });
+  }
+
+  function kendraBackHandler() {
+    // Return to the result if there was one, else home.
+    if (state._lastResult && state._lastResult.reason && state._lastResult.reason !== "none") {
+      openResult();
+    } else {
+      show("home");
+    }
+  }
+
+  // Tabs are wired by the map module (see initMap). Until then this is a no-op
+  // and the Map tab stays hidden, so the list works on its own.
+  function wireKendraTabs() { if (state.wireKendraTabs) state.wireKendraTabs(); }
+
   // ---- nav helpers --------------------------------------------------------
 
   function goType() { show("search", { focus: "searchInput" }); closeSuggestions(); }
   function goPhoto() { show("photo"); }
+  function goKendra() { openKendra(); }
 
   // ---- init ---------------------------------------------------------------
 
@@ -677,6 +817,22 @@
     });
     $("#confirmShow").addEventListener("click", confirmAndMatch);
 
+    // Kendra locator
+    var useLoc = $("#useLocation");
+    if (useLoc) useLoc.addEventListener("click", useLocation);
+    var pinForm = $("#pinForm");
+    if (pinForm) pinForm.addEventListener("submit", submitPin);
+    var kBack = $("#kendraBack");
+    if (kBack) kBack.addEventListener("click", kendraBackHandler);
+    var fKendra = $("#footerKendra");
+    if (fKendra) fKendra.addEventListener("click", goKendra);
+    // only digits in the PIN field
+    var pinInput = $("#pinInput");
+    if (pinInput) pinInput.addEventListener("input", function () {
+      pinInput.value = pinInput.value.replace(/\D/g, "").slice(0, 6);
+    });
+    wireKendraTabs();
+
     // offline
     window.addEventListener("online", updateOnline);
     window.addEventListener("offline", updateOnline);
@@ -684,6 +840,13 @@
   }
 
   function loadData() {
+    state.kendras = [];
+    // Kendras are optional; load them in parallel but never block the app.
+    fetch("data/kendras.json")
+      .then(function (r) { return r.json(); })
+      .then(function (k) { if (Array.isArray(k)) state.kendras = k; })
+      .catch(function () {});
+
     return Promise.all([
       fetch("data/jan_aushadhi.json").then(function (r) { return r.json(); }),
       fetch("data/brands.json").then(function (r) { return r.json(); }),
