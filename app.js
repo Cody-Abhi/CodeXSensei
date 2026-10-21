@@ -413,7 +413,7 @@
     // savings band
     if (res.savings) {
       var band = el("div", { class: "savings-band" }, [
-        el("span", { class: "lbl", text: "YOU SAVE" }),
+        el("span", { class: "lbl", text: t("result.saveLabel") }),
         el("span", { class: "num", id: "saveNum", "data-target": res.savings.saved, text: rupees(res.savings.saved) }),
         el("span", { class: "pct", text: "(" + res.savings.pct + "%)" }),
       ]);
