@@ -70,6 +70,7 @@
       "err.timeout": "That took too long. Type the name instead.",
       "err.tooBig": "Photo is too large. Try again.",
       "err.generic": "Something went wrong. Please try again.",
+      "err.title": "Something went wrong",
       "err.handwriting": "We read printed strips and boxes, not handwriting.",
 
       "share.whatsapp": "Send on WhatsApp",
@@ -141,6 +142,7 @@
       "err.timeout": "बहुत देर लगी। नाम लिखकर खोजें।",
       "err.tooBig": "फ़ोटो बहुत बड़ी है। फिर कोशिश करें।",
       "err.generic": "कुछ गड़बड़ हुई। फिर कोशिश करें।",
+      "err.title": "कुछ गड़बड़ हुई",
       "err.handwriting": "हम छपे पत्ते और डिब्बे पढ़ते हैं, हाथ की लिखावट नहीं।",
 
       "share.whatsapp": "व्हाट्सऐप पर भेजें",

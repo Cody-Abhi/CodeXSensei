@@ -340,7 +340,7 @@
     host.innerHTML = "";
     host.appendChild(el("div", { class: "state-card error", role: "alert" }, [
       iconAlert(),
-      el("h2", { text: t("err.generic").split(".")[0] }),
+      el("h2", { text: t("err.title") }),
       el("p", { text: t(key) }),
       el("div", { class: "state-actions" }, [
         el("button", { class: "btn btn-primary btn-sm", onclick: function () { goType(); } }, [t("home.cta.type")]),
@@ -436,12 +436,16 @@
       card.appendChild(alts);
     }
 
-    // actions
+    // actions: primary Kendra (full width), then a compact secondary row
     var actions = el("div", { class: "result-actions" });
     actions.appendChild(linkButton(KENDRA_URL, t("result.kendra"), true));
-    actions.appendChild(linkButton(SUGAM_APP_URL, t("result.app")));
-    if (res.savings && r.brand) actions.appendChild(whatsappButton(res));
-    if (window.speechSynthesis) actions.appendChild(speakButton(res));
+
+    var secondary = el("div", { class: "action-row" });
+    secondary.appendChild(linkButton(SUGAM_APP_URL, t("result.app"), false, true));
+    if (res.savings && r.brand) secondary.appendChild(whatsappButton(res));
+    if (window.speechSynthesis) secondary.appendChild(speakButton(res));
+    actions.appendChild(secondary);
+
     actions.appendChild(el("button", { class: "btn btn-outline", onclick: function () { goType(); } }, [t("result.another")]));
     card.appendChild(actions);
 
@@ -480,9 +484,9 @@
 
   // buttons ---
 
-  function linkButton(href, label, primary) {
+  function linkButton(href, label, primary, small) {
     return el("a", {
-      class: "btn " + (primary ? "btn-primary" : "btn-outline"),
+      class: "btn " + (primary ? "btn-primary" : "btn-outline") + (small ? " btn-compact" : ""),
       href: href, target: "_blank", rel: "noopener noreferrer",
     }, [label]);
   }
@@ -496,13 +500,13 @@
       price: rupees(g.mrp),
     });
     return el("a", {
-      class: "btn btn-outline", target: "_blank", rel: "noopener noreferrer",
+      class: "btn btn-outline btn-compact", target: "_blank", rel: "noopener noreferrer",
       href: "https://wa.me/?text=" + encodeURIComponent(text),
     }, [t("share.whatsapp")]);
   }
 
   function speakButton(res) {
-    return el("button", { class: "btn btn-outline", onclick: function () { speak(res); } }, [t("speak.button")]);
+    return el("button", { class: "btn btn-outline btn-compact", onclick: function () { speak(res); } }, [t("speak.button")]);
   }
 
   function speak(res) {
