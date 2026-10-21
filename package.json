@@ -1,0 +1,17 @@
+{
+  "name": "dawadekho",
+  "version": "1.0.0",
+  "description": "See the medicine. See the price. Before you pay. Find the Jan Aushadhi generic for a branded Indian medicine and how much you save.",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "validate-data": "node scripts/validate-data.js",
+    "check": "npm run validate-data && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cody-abhi/codexsensei"
+  },
+  "keywords": ["jan-aushadhi", "generic-medicine", "gemma", "pharmacy", "india", "hackathon"]
+}
