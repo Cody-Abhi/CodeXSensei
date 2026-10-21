@@ -84,7 +84,14 @@ header.app {
 }
 .wordmark .dot { width: 12px; height: 12px; border-radius: 3px; background: var(--saffron); display: inline-block; }
 
-.header-controls { display: inline-flex; align-items: center; gap: var(--s2); }
+.header-controls { display: inline-flex; align-items: center; gap: var(--s2); flex: none; }
+
+/* Keep the header on one line at 320px without overflow (touch targets stay 48px) */
+@media (max-width: 400px) {
+  .wordmark { font-size: var(--text-md); min-width: 0; }
+  .header-controls { gap: var(--s1); }
+  .langtoggle button { min-width: 48px; padding: 0 var(--s2); }
+}
 
 /* Theme toggle — 48px icon button */
 .icon-btn {
