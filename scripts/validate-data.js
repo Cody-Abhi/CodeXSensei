@@ -108,8 +108,38 @@ brandList.forEach((b, i) => {
   }
 });
 
+// ---- Kendras (optional file) ----
+var LKO_BBOX = { minLat: 26.65, maxLat: 27.05, minLng: 80.80, maxLng: 81.15 };
+var kendraCount = 0;
+var kendraPath = path.join(DATA_DIR, "kendras.json");
+if (fs.existsSync(kendraPath)) {
+  var kendras;
+  try { kendras = JSON.parse(fs.readFileSync(kendraPath, "utf8")); }
+  catch (e) { fail("Could not parse kendras.json: " + e.message); kendras = []; }
+  if (!Array.isArray(kendras)) fail("kendras.json must be a JSON array");
+  else {
+    kendraCount = kendras.length;
+    if (kendras.length === 0) warn("kendras.json is empty");
+    var seenKendra = new Set();
+    kendras.forEach(function (k, i) {
+      var where = "kendras[" + i + "] (" + (k && k.name ? k.name : "?") + ")";
+      if (!isNonEmptyString(k.name)) fail(where + ": missing name");
+      if (!isNonEmptyString(k.address)) fail(where + ": missing address");
+      if (!isNonEmptyString(k.pin) || !/^\d{6}$/.test(k.pin)) fail(where + ": pin must be 6 digits");
+      if (!isPositiveNumber(k.lat) && !(typeof k.lat === "number" && Number.isFinite(k.lat))) fail(where + ": lat must be a number");
+      if (typeof k.lng !== "number" || !Number.isFinite(k.lng)) fail(where + ": lng must be a number");
+      if (typeof k.lat === "number" && (k.lat < LKO_BBOX.minLat || k.lat > LKO_BBOX.maxLat)) fail(where + ": lat outside Lucknow bbox (" + k.lat + ")");
+      if (typeof k.lng === "number" && (k.lng < LKO_BBOX.minLng || k.lng > LKO_BBOX.maxLng)) fail(where + ": lng outside Lucknow bbox (" + k.lng + ")");
+      if (k.approx_location !== undefined && typeof k.approx_location !== "boolean") fail(where + ": approx_location must be boolean");
+      if (k.phone !== undefined && k.phone !== null && !isNonEmptyString(k.phone)) fail(where + ": phone must be a string or null");
+      var code = isNonEmptyString(k.code) ? k.code : null;
+      if (code) { if (seenKendra.has(code)) fail(where + ": duplicate code"); else seenKendra.add(code); }
+    });
+  }
+}
+
 // ---- Report ----
-console.log(`Checked ${products.length} generics and ${brandList.length} brands.`);
+console.log(`Checked ${products.length} generics, ${brandList.length} brands` + (kendraCount ? `, ${kendraCount} kendras.` : "."));
 if (warnings.length) {
   console.log(`\n${warnings.length} warning(s):`);
   warnings.forEach((w) => console.log(`  ⚠ ${w}`));
