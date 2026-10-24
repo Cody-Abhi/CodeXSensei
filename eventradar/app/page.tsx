@@ -66,26 +66,20 @@ export default function Home() {
     if (!data) return [];
     let list = data.events;
 
-    const modeFilters: FilterKey[] = [];
+    const hasMode = filters.has("online") || filters.has("offline");
     const typeFilters: FilterKey[] = [];
-    if (filters.has("online")) modeFilters.push("online");
-    if (filters.has("offline")) modeFilters.push("offline");
     if (filters.has("hackathon")) typeFilters.push("hackathon");
     if (filters.has("meetup")) typeFilters.push("meetup");
 
-    if (modeFilters.length) {
-      list = list.filter((e) => {
-        const online = isOnline(e);
-        return (
-          (filters.has("online") && online) ||
+    if (hasMode) {
+      list = list.filter(
+        (e) =>
+          (filters.has("online") && isOnline(e)) ||
           (filters.has("offline") && e.mode === "offline")
-        );
-      });
+      );
     }
     if (typeFilters.length) {
-      list = list.filter((e) =>
-        typeFilters.includes(e.event_type as FilterKey)
-      );
+      list = list.filter((e) => typeFilters.includes(e.event_type as FilterKey));
     }
 
     const sorted = [...list];
@@ -100,13 +94,16 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
+      {/* Masthead */}
       <header className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Event<span className="text-indigo-400">Radar</span>
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Live tech-event finder — hackathons, meetups &amp; more, aggregated
-          across sources in one search.
+        <div className="brutal inline-block bg-brut-pink px-5 py-3">
+          <h1 className="display text-3xl uppercase leading-none sm:text-5xl">
+            Event<span className="text-white">Radar</span>
+          </h1>
+        </div>
+        <p className="mt-4 max-w-xl text-sm font-semibold sm:text-base">
+          Live tech-event finder — hackathons, meetups &amp; more, scraped &amp;
+          structured across sources in <span className="bg-brut-yellow px-1">one search.</span>
         </p>
       </header>
 
@@ -117,7 +114,7 @@ export default function Home() {
         <div className="mt-6">
           {data && <StatusStrip sources={data.sources} />}
           {loading && (
-            <div className="text-xs text-slate-400">
+            <div className="brutal-sm inline-block bg-white px-3 py-1.5 text-xs font-bold uppercase">
               Scanning sources for “{lastQuery.topic}”
               {lastQuery.location ? ` in ${lastQuery.location}` : ""}…
             </div>
@@ -127,21 +124,24 @@ export default function Home() {
 
       {/* Fatal error (e.g. missing API keys) */}
       {fatalError && (
-        <div className="mt-6 rounded-lg border border-rose-400/30 bg-rose-500/10 p-4 text-sm text-rose-200">
-          <p className="font-semibold">Something went wrong</p>
-          <p className="mt-1 text-rose-200/80">{fatalError}</p>
+        <div className="brutal mt-6 bg-brut-red p-4 text-sm font-semibold text-white">
+          <p className="text-base font-bold uppercase">⚠ Something went wrong</p>
+          <p className="mt-1">{fatalError}</p>
         </div>
       )}
 
       {/* Partial-failure banner — shown alongside results */}
       {data && data.errors.length > 0 && (
-        <div className="mt-6 rounded-lg border border-amber-400/30 bg-amber-500/10 p-4 text-sm text-amber-100">
-          <p className="font-semibold">
-            Some sources didn&apos;t respond (results below are from the rest)
+        <div className="brutal mt-6 bg-brut-orange p-4 text-sm font-semibold">
+          <p className="text-base font-bold uppercase">
+            ⚠ Some sources didn&apos;t respond
           </p>
-          <ul className="mt-1 list-inside list-disc text-amber-100/80">
+          <p className="text-xs">(results below are from the rest)</p>
+          <ul className="mt-2 space-y-1">
             {data.errors.map((e, i) => (
-              <li key={i}>{e}</li>
+              <li key={i} className="border-l-[3px] border-black pl-2">
+                {e}
+              </li>
             ))}
           </ul>
         </div>
@@ -161,7 +161,7 @@ export default function Home() {
       )}
 
       {/* Results / skeletons */}
-      <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {loading &&
           Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         {!loading &&
@@ -172,9 +172,9 @@ export default function Home() {
 
       {/* Empty states */}
       {!loading && data && data.events.length === 0 && !fatalError && (
-        <div className="mt-10 rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-          <p className="text-lg font-semibold text-white">No events found</p>
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
+        <div className="brutal mt-10 bg-white p-8 text-center">
+          <p className="display text-2xl uppercase">No events found</p>
+          <p className="mx-auto mt-3 max-w-md text-sm font-semibold">
             Try broadening the topic (e.g. just “hackathon”) or removing the
             location to search all of India.
           </p>
@@ -183,16 +183,17 @@ export default function Home() {
 
       {/* Filtered-to-empty */}
       {!loading && hasResults && visible.length === 0 && (
-        <div className="mt-10 rounded-xl border border-white/10 bg-white/5 p-8 text-center text-sm text-slate-400">
+        <div className="brutal mt-10 bg-white p-8 text-center text-sm font-bold uppercase">
           No events match the active filters. Clear a filter to see more.
         </div>
       )}
 
       {data && (
-        <footer className="mt-10 text-center text-xs text-slate-600">
+        <footer className="mt-12 border-t-[3px] border-black pt-4 text-center text-xs font-semibold">
           Fetched {data.events.length} events in {(data.tookMs / 1000).toFixed(1)}s ·
-          Missing data always shown as “Not listed”, never filled from another
-          source.
+          Missing data always shown as{" "}
+          <span className="bg-brut-yellow px-1">“Not listed”</span>, never filled
+          from another source.
         </footer>
       )}
     </main>

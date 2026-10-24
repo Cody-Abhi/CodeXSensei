@@ -3,11 +3,11 @@
 export type SortKey = "date" | "source";
 export type FilterKey = "online" | "offline" | "hackathon" | "meetup";
 
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: "online", label: "Online" },
-  { key: "offline", label: "Offline" },
-  { key: "hackathon", label: "Hackathon" },
-  { key: "meetup", label: "Meetup" },
+const FILTERS: { key: FilterKey; label: string; color: string }[] = [
+  { key: "online", label: "Online", color: "bg-brut-cyan" },
+  { key: "offline", label: "Offline", color: "bg-brut-lime" },
+  { key: "hackathon", label: "Hackathon", color: "bg-brut-purple" },
+  { key: "meetup", label: "Meetup", color: "bg-brut-orange" },
 ];
 
 export default function Toolbar({
@@ -25,9 +25,8 @@ export default function Toolbar({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="text-sm text-slate-400">
-        <span className="font-semibold text-slate-200">{count}</span>{" "}
-        {count === 1 ? "event" : "events"}
+      <div className="brutal-sm bg-brut-yellow px-3 py-1.5 text-sm font-bold uppercase">
+        {count} {count === 1 ? "event" : "events"}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -40,10 +39,8 @@ export default function Toolbar({
               type="button"
               onClick={() => onToggleFilter(f.key)}
               aria-pressed={active}
-              className={`rounded-full border px-3 py-1 text-xs transition ${
-                active
-                  ? "border-indigo-400/50 bg-indigo-500/20 text-indigo-100"
-                  : "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
+              className={`brutal-press px-3 py-1.5 text-xs font-bold uppercase ${
+                active ? f.color : "bg-white"
               }`}
             >
               {f.label}
@@ -52,12 +49,12 @@ export default function Toolbar({
         })}
 
         {/* Sort */}
-        <label className="ml-1 flex items-center gap-1.5 text-xs text-slate-400">
+        <label className="ml-1 flex items-center gap-1.5 text-xs font-bold uppercase">
           Sort
           <select
             value={sort}
             onChange={(e) => onSortChange(e.target.value as SortKey)}
-            className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-200 outline-none focus:border-indigo-400/50"
+            className="brutal-sm cursor-pointer bg-white px-2 py-1.5 text-xs font-bold uppercase outline-none"
           >
             <option value="date">Date</option>
             <option value="source">Source</option>

@@ -8,7 +8,15 @@ with a per-source status strip so you can see exactly what succeeded and what
 didn't.
 
 Built as a 1-hour hackathon MVP: **one** end-to-end flow, no auth, no database,
-no notifications.
+no notifications. The UI uses a **neobrutalist** design — thick black borders,
+hard offset shadows, bright accents and bold type.
+
+| Search | Results |
+|--------|---------|
+| ![search](docs/screenshot-search.png) | ![results](docs/screenshot-results.png) |
+
+📖 **Full technical documentation:** [`DOCS.md`](./DOCS.md) — architecture, every
+module, the API contract, the data model, and the design system.
 
 ## Stack
 

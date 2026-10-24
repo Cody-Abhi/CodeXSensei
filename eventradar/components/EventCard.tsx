@@ -2,11 +2,11 @@ import type { EventItem } from "@/lib/types";
 import { formatDate, minutesAgo } from "@/lib/dates";
 
 const TYPE_STYLES: Record<EventItem["event_type"], string> = {
-  hackathon: "bg-violet-400/15 text-violet-200 border-violet-400/30",
-  meetup: "bg-sky-400/15 text-sky-200 border-sky-400/30",
-  conference: "bg-amber-400/15 text-amber-200 border-amber-400/30",
-  workshop: "bg-teal-400/15 text-teal-200 border-teal-400/30",
-  other: "bg-slate-400/15 text-slate-200 border-slate-400/30",
+  hackathon: "bg-brut-purple",
+  meetup: "bg-brut-cyan",
+  conference: "bg-brut-orange",
+  workshop: "bg-brut-lime",
+  other: "bg-white",
 };
 
 const MODE_LABEL: Record<NonNullable<EventItem["mode"]>, string> = {
@@ -29,14 +29,12 @@ export default function EventCard({ event }: { event: EventItem }) {
       : dateLabel;
 
   return (
-    <div className="flex flex-col rounded-xl border border-white/10 bg-white/5 p-5 transition hover:border-white/20 hover:bg-white/[0.07]">
+    <div className="brutal flex flex-col bg-white p-5 transition-transform hover:-translate-y-1">
       {/* Title + type chip */}
-      <div className="mb-2 flex items-start justify-between gap-3">
-        <h3 className="text-base font-semibold leading-snug text-white">
-          {event.name}
-        </h3>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <h3 className="text-lg font-bold leading-tight">{event.name}</h3>
         <span
-          className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium capitalize ${
+          className={`shrink-0 border-[3px] border-black px-2 py-0.5 text-[11px] font-bold uppercase ${
             TYPE_STYLES[event.event_type]
           }`}
         >
@@ -46,20 +44,20 @@ export default function EventCard({ event }: { event: EventItem }) {
 
       {/* Date (raw text in tooltip) */}
       <div
-        className="mb-2 text-sm text-slate-300"
+        className="mb-3 inline-flex w-fit items-center gap-1.5 border-2 border-black bg-brut-yellow px-2 py-0.5 text-sm font-semibold"
         title={event.date_text || "No raw date text on page"}
       >
         🗓 {dateRange}
       </div>
 
       {/* Mode + venue */}
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-slate-300">
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-sm font-medium">
         {event.mode ? (
-          <span className="rounded-md bg-white/10 px-2 py-0.5 text-xs">
+          <span className="border-2 border-black bg-paper px-2 py-0.5 text-xs font-bold">
             {MODE_LABEL[event.mode]}
           </span>
         ) : null}
-        <span className={event.venue_or_city ? "" : "text-slate-500"}>
+        <span className={event.venue_or_city ? "" : "text-black/40"}>
           {event.venue_or_city ?? "Venue: not listed"}
         </span>
       </div>
@@ -70,9 +68,9 @@ export default function EventCard({ event }: { event: EventItem }) {
           {event.themes.slice(0, 3).map((t) => (
             <span
               key={t}
-              className="rounded bg-white/5 px-2 py-0.5 text-[11px] text-slate-300 ring-1 ring-white/10"
+              className="border-2 border-black bg-brut-cyan px-2 py-0.5 text-[11px] font-bold"
             >
-              {t}
+              #{t}
             </span>
           ))}
         </div>
@@ -81,41 +79,41 @@ export default function EventCard({ event }: { event: EventItem }) {
       {/* Eligibility */}
       <div className="mb-4 text-sm">
         {event.eligibility ? (
-          <span className="text-slate-300">
-            <span className="text-slate-500">Eligibility: </span>
+          <span>
+            <span className="font-bold uppercase">Eligibility: </span>
             {event.eligibility}
           </span>
         ) : (
-          <span className="text-slate-500">Eligibility: not listed</span>
+          <span className="text-black/40">Eligibility: not listed</span>
         )}
       </div>
 
       {/* Actions */}
-      <div className="mt-auto flex items-center gap-2">
+      <div className="mt-auto flex flex-wrap items-center gap-2">
         {event.registration_url && (
           <a
             href={event.registration_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg bg-indigo-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-400"
+            className="brutal-press bg-brut-pink px-3 py-1.5 text-sm font-bold uppercase"
           >
-            Register
+            Register →
           </a>
         )}
         <a
           href={event.source_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-slate-200 transition hover:bg-white/10"
+          className="brutal-press bg-white px-3 py-1.5 text-sm font-bold uppercase"
         >
           View source
         </a>
       </div>
 
       {/* Footer */}
-      <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3 text-[11px] text-slate-500">
-        <span>{event.source_name}</span>
-        <span>{checkedLabel(event.fetched_at)}</span>
+      <div className="mt-4 flex items-center justify-between border-t-[3px] border-black pt-2 text-[11px] font-bold uppercase">
+        <span className="bg-black px-1.5 text-white">{event.source_name}</span>
+        <span className="text-black/50">{checkedLabel(event.fetched_at)}</span>
       </div>
     </div>
   );

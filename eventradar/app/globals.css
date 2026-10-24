@@ -1,21 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Archivo+Black&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --paper: #fdf0d5;
+  --ink: #111111;
 }
 
 body {
-  background: radial-gradient(1200px 600px at 50% -10%, #16213e 0%, #0b1020 55%);
+  background-color: var(--paper);
+  /* dotted-grid paper, a neobrutalism staple */
+  background-image: radial-gradient(#00000014 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   min-height: 100vh;
 }
 
-/* Thin scrollbar for the status strip */
+@layer components {
+  /* Hard black border + offset drop shadow — the core brutalist card. */
+  .brutal {
+    @apply border-[3px] border-black shadow-[6px_6px_0_0_#000];
+  }
+  .brutal-sm {
+    @apply border-[3px] border-black shadow-[4px_4px_0_0_#000];
+  }
+  /* Buttons/chips that visibly "press" into the page on interaction. */
+  .brutal-press {
+    @apply border-[3px] border-black shadow-[4px_4px_0_0_#000] transition-all
+           hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[6px_6px_0_0_#000]
+           active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_#000];
+  }
+  .display {
+    font-family: "Archivo Black", "Space Grotesk", sans-serif;
+  }
+}
+
 .scroll-thin::-webkit-scrollbar {
-  height: 6px;
+  height: 8px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
+  background: #000;
+  border-radius: 0;
 }

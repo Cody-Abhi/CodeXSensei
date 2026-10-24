@@ -1,14 +1,14 @@
 import type { SourceStatus } from "@/lib/types";
 
 /**
- * Per-source status strip, e.g. "Devfolio ✓ 12 · Devpost ✗ blocked".
- * Green tick + count for a source that returned, red cross + reason for a
- * source that failed — shown even while results render.
+ * Per-source status strip, e.g. "DEVFOLIO ✓ 12 · DEVPOST ✗ blocked".
+ * Green block for a source that returned, red block for one that failed —
+ * shown even while results render.
  */
 export default function StatusStrip({ sources }: { sources: SourceStatus[] }) {
   if (sources.length === 0) return null;
   return (
-    <div className="scroll-thin flex gap-2 overflow-x-auto pb-1 text-xs">
+    <div className="scroll-thin flex gap-2 overflow-x-auto pb-2 text-xs font-bold uppercase tracking-wide">
       {sources.map((s) => (
         <a
           key={`${s.name}-${s.url}`}
@@ -16,17 +16,17 @@ export default function StatusStrip({ sources }: { sources: SourceStatus[] }) {
           target="_blank"
           rel="noopener noreferrer"
           title={s.error ? `${s.name}: ${s.error}` : `${s.name}: ${s.count} found`}
-          className={`flex shrink-0 items-center gap-1 rounded-full border px-3 py-1 transition hover:brightness-125 ${
-            s.ok
-              ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
-              : "border-rose-400/30 bg-rose-400/10 text-rose-200"
+          className={`brutal-press flex shrink-0 items-center gap-1.5 px-3 py-1.5 ${
+            s.ok ? "bg-brut-lime" : "bg-brut-red text-white"
           }`}
         >
-          <span className="font-medium">{s.name}</span>
+          <span>{s.name}</span>
           {s.ok ? (
-            <span aria-label="ok">✓ {s.count}</span>
+            <span aria-label="ok" className="rounded-none bg-black px-1.5 text-brut-lime">
+              ✓ {s.count}
+            </span>
           ) : (
-            <span aria-label="failed" className="max-w-[12rem] truncate">
+            <span aria-label="failed" className="max-w-[12rem] truncate normal-case">
               ✗ {s.error ?? "failed"}
             </span>
           )}
