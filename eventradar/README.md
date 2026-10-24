@@ -3,7 +3,7 @@
 A one-page tech-event finder. Enter a **topic** (and optionally a location), hit
 Search, and EventRadar fans out across several event sources in parallel, reads
 each page with the [TinyFish](https://tinyfish.ai) Fetch/Search API, extracts
-structured events with Claude, and shows honest, de-duplicated result cards —
+structured events with Gemini, and shows honest, de-duplicated result cards —
 with a per-source status strip so you can see exactly what succeeded and what
 didn't.
 
@@ -22,7 +22,7 @@ module, the API contract, the data model, and the design system.
 
 - **Next.js 15** (App Router) + **TypeScript** + **Tailwind CSS**
 - **TinyFish SDK** (`@tiny-fish/sdk`) — Search + Fetch (+ optional Agent)
-- **Anthropic SDK** (`@anthropic-ai/sdk`) — extraction with `claude-sonnet-5-5`
+- **Google Gemini SDK** (`@google/genai`) — extraction with `gemini-2.5-flash`
 - **zod** — validates every extracted event
 
 All API keys stay **server-side**: they are read from the environment inside the
@@ -37,7 +37,7 @@ npm install
 # add your keys
 cp .env.example .env.local
 #   TINYFISH_API_KEY=...        (https://tinyfish.ai)
-#   ANTHROPIC_API_KEY=...       (https://console.anthropic.com)
+#   GEMINI_API_KEY=...          (free key at https://aistudio.google.com/apikey)
 
 npm run dev
 # open http://localhost:3000
@@ -56,7 +56,7 @@ Query ──▶ A. Fixed source URLs   (Devfolio, MLH, Luma, Meetup, Devpost)
       ──▶ B. TinyFish Search     (top 5 new URLs, not already fixed)
       ──▶ C. TinyFish Fetch      (markdown + links, ≤10 URLs/call, ttl 3600,
       │                           per-URL failures recorded, never fatal)
-      ──▶ D. LLM extraction      (claude-sonnet-5-5 → JSON, zod-validated,
+      ──▶ D. LLM extraction      (gemini-2.5-flash → JSON, zod-validated,
       │                           retry once on bad JSON, else skip page)
       ──▶ E. Post-process        (drop no-name/past, topic + location filter,
                                   dedupe by name+date keeping the richer record,

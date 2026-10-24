@@ -15,7 +15,7 @@ event sites **live** on each search.
 
 A single request fans out to a fixed set of source URLs plus a handful of
 search-discovered ones, fetches them all through TinyFish, extracts structured
-events with Claude, and returns a clean, de-duplicated, honestly-labelled list
+events with Gemini, and returns a clean, de-duplicated, honestly-labelled list
 along with a per-source status so the user always knows what succeeded.
 
 **Design goals**
@@ -35,7 +35,7 @@ along with a per-source status so the user always knows what succeeded.
 - **Next.js 15** (App Router) + **React 19** + **TypeScript**
 - **Tailwind CSS 3** — neobrutalist design system (section 7)
 - **`@tiny-fish/sdk`** — Search, Fetch, and (optional) Agent
-- **`@anthropic-ai/sdk`** — extraction with model `claude-sonnet-5-5`
+- **`@google/genai`** — extraction with model `gemini-2.5-flash`
 - **`zod`** — schema validation of every extracted event
 
 ---
@@ -53,7 +53,7 @@ along with a per-source status so the user always knows what succeeded.
    ├── A. buildFixedSources()        lib/sources.ts
    ├── B. client.search.query()      @tiny-fish/sdk  → +5 URLs
    ├── C. fetchPages()               lib/tinyfish.ts  (Fetch, markdown+links)
-   ├── D. extractFromPage() × N      lib/extract.ts   (Claude, zod, retry)
+   ├── D. extractFromPage() × N      lib/extract.ts   (Gemini, zod, retry)
    │     [+ optional] fetchUnstopViaAgent()  lib/unstop.ts (Agent API)
    └── E. postProcess()              lib/postprocess.ts (filter/dedupe/sort)
    ▼
@@ -99,9 +99,10 @@ are recorded per source. A whole-batch throw (network/timeout) is converted into
 per-URL errors so one bad batch can't sink the request.
 
 ### D. LLM extraction — `extractFromPage(page)` (`lib/extract.ts`)
-For each fetched page, Claude (`claude-sonnet-5-5`) is given the page's markdown
-(capped at ~14k chars) and its `links` list, and asked to return
-`{"events": Event[]}`. The prompt's hard rules:
+For each fetched page, Gemini (`gemini-2.5-flash`, overridable via `GEMINI_MODEL`)
+is given the page's markdown (capped at ~14k chars) and its `links` list, and
+asked to return `{"events": Event[]}` using JSON mode
+(`responseMimeType: "application/json"`). The prompt's hard rules:
 
 > *Use ONLY text present in the page. If a field is absent, return null. Never
 > guess dates or eligibility. Prefer a URL from the links list for
@@ -245,7 +246,7 @@ eventradar/
 │   ├── types.ts              # EventItem + zod schemas + API types
 │   ├── tinyfish.ts           # TinyFish client + fetchPages (chunk, errors)
 │   ├── sources.ts            # fixed URLs, city slugs, aliases
-│   ├── extract.ts            # Claude extraction (zod-validated, retry once)
+│   ├── extract.ts            # Gemini extraction (zod-validated, retry once)
 │   ├── postprocess.ts        # step E: filter / dedupe / sort
 │   ├── dates.ts              # ISO + Devfolio DD/MM/YY parsing, formatting
 │   ├── unstop.ts             # optional Agent-API source (gated)
@@ -263,7 +264,8 @@ eventradar/
 | Env var | Required | Purpose |
 |---------|----------|---------|
 | `TINYFISH_API_KEY` | ✅ | TinyFish Search / Fetch / Agent |
-| `ANTHROPIC_API_KEY` | ✅ | Claude extraction (`claude-sonnet-5-5`) |
+| `GEMINI_API_KEY` | ✅ | Gemini extraction (`gemini-2.5-flash`); `GOOGLE_API_KEY` also accepted |
+| `GEMINI_MODEL` | ❌ | override the Gemini model (default `gemini-2.5-flash`) |
 | `EVENTRADAR_ENABLE_UNSTOP` | ❌ | set to `1` to enable the Unstop Agent source |
 
 Copy `.env.example` → `.env.local` and fill both keys. Without them the app

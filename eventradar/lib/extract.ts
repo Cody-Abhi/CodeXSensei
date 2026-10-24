@@ -1,18 +1,23 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import { extractionResultSchema, type ExtractedEvent } from "./types";
 import type { MarkdownPage } from "./tinyfish";
 
-const MODEL = "claude-sonnet-5-5";
+// Gemini handles step D (extraction). Model is overridable via GEMINI_MODEL;
+// gemini-2.5-flash is fast and available on the free tier.
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const MAX_TEXT_CHARS = 14_000; // cap page text to keep latency/tokens bounded
 const MAX_LINKS = 60;
 
-let _client: Anthropic | null = null;
-function getAnthropic(): Anthropic {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY is not set — add it to .env.local");
+let _client: GoogleGenAI | null = null;
+function getGemini(): GoogleGenAI {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "GEMINI_API_KEY is not set — add it to .env.local (get one at https://aistudio.google.com/apikey)"
+    );
   }
   if (!_client) {
-    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    _client = new GoogleGenAI({ apiKey });
   }
   return _client;
 }
@@ -71,19 +76,22 @@ function coerceJson(raw: string): string {
 }
 
 async function callModel(content: string, strictRepair = false): Promise<string> {
-  const client = getAnthropic();
-  const msg = await client.messages.create({
+  const ai = getGemini();
+  const response = await ai.models.generateContent({
     model: MODEL,
-    max_tokens: 4096,
-    system: strictRepair
-      ? SYSTEM + "\n\nYour previous reply was not valid JSON. Return ONLY the JSON object."
-      : SYSTEM,
-    messages: [{ role: "user", content }],
+    contents: content,
+    config: {
+      systemInstruction: strictRepair
+        ? SYSTEM +
+          "\n\nYour previous reply was not valid JSON. Return ONLY the JSON object."
+        : SYSTEM,
+      // Ask Gemini for raw JSON — no markdown fences.
+      responseMimeType: "application/json",
+      temperature: 0,
+      maxOutputTokens: 4096,
+    },
   });
-  return msg.content
-    .map((b) => (b.type === "text" ? b.text : ""))
-    .join("")
-    .trim();
+  return (response.text ?? "").trim();
 }
 
 /**
