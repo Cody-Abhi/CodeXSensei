@@ -3,13 +3,42 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import compression from 'compression';
-import express, { type Express, type NextFunction, type Request, type Response } from 'express';
+import express, {
+  type Express,
+  type NextFunction,
+  type Request,
+  type RequestHandler,
+  type Response,
+} from 'express';
 import helmet from 'helmet';
 
+import { createAiRateLimiter } from './middleware/rateLimit';
 import { healthRouter } from './routes/health';
+import { createPlanRouter, type PlanGenerator } from './routes/plan';
+import { createPlanCache } from './services/cache';
+import { createGeminiFromEnv } from './services/gemini';
+import { createPlanService } from './services/planService';
 
 /** Maximum accepted JSON body size (PRD §9). */
 const BODY_LIMIT = '20kb';
+
+/** Options for {@link createApp} (dependency injection for tests). */
+export interface CreateAppOptions {
+  /** Directory of the built client; defaults to the resolved `dist/client`. */
+  clientDir?: string;
+  /** Plan generator; defaults to a Gemini-or-fallback service. */
+  planService?: PlanGenerator;
+  /** Rate limiter for AI routes; defaults to {@link createAiRateLimiter}. */
+  aiRateLimit?: RequestHandler;
+}
+
+/**
+ * Build the default plan service: Gemini when `GEMINI_API_KEY` is set, else the
+ * local rule-based fallback, backed by an LRU cache.
+ */
+function createDefaultPlanService(): PlanGenerator {
+  return createPlanService({ client: createGeminiFromEnv(), cache: createPlanCache() });
+}
 
 /**
  * Resolve the directory holding the built client (`dist/client`). When running
@@ -114,11 +143,14 @@ function serveClient(app: Express, clientDir: string): void {
  * Create and configure the Express application. Exported as a factory so tests
  * can exercise it with Supertest without opening a port.
  *
- * @param clientDir - Directory of the built client; defaults to the resolved
- *   `dist/client`. The static layer is skipped when the directory is absent.
+ * @param options - Optional client directory and injected services.
  * @returns A configured Express application.
  */
-export function createApp(clientDir: string = resolveClientDir()): Express {
+export function createApp(options: CreateAppOptions = {}): Express {
+  const clientDir = options.clientDir ?? resolveClientDir();
+  const planService = options.planService ?? createDefaultPlanService();
+  const aiRateLimit = options.aiRateLimit ?? createAiRateLimiter();
+
   const app = express();
 
   applySecurity(app);
@@ -126,6 +158,8 @@ export function createApp(clientDir: string = resolveClientDir()): Express {
   app.use(express.json({ limit: BODY_LIMIT }));
 
   app.use('/api', healthRouter);
+  app.use('/api/plan', aiRateLimit);
+  app.use('/api', createPlanRouter(planService));
 
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- trusted path, not user input
   if (fs.existsSync(clientDir)) {

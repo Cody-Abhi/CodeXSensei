@@ -30,7 +30,7 @@ describe('createApp static client', () => {
   });
 
   it('skips the static layer and 404s when the client build is absent', async () => {
-    const app = createApp('/no/such/client/dir');
+    const app = createApp({ clientDir: '/no/such/client/dir' });
     const res = await request(app).get('/');
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: 'Not found' });

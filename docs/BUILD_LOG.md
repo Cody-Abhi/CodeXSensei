@@ -88,3 +88,32 @@ templates, 100% unit coverage on `shared/`.
 - Vitest: 88 tests / 10 files. **`shared/` is 100% on all metrics**; overall 97.5% stmts, 95.5%
   branches, 96.1% funcs, 97.3% lines.
 - Build + Playwright E2E + axe: 16 passed. `npm audit`: 0 vulnerabilities.
+
+## Phase 4 — Server: plan API, Gemini service, security, cache, fallback
+
+**Goal:** `POST /api/plan` backed by a mockable Gemini service with retry → repair → fallback,
+exact-budget normalisation, LRU cache, prompt-injection guard, rate limiting — Supertest suite green.
+
+**Built:**
+
+- `services/gemini.ts`: `GeminiJsonClient` interface (DI — real API never hit in tests),
+  `PLAN_RESPONSE_SCHEMA`, `createGeminiClient` (@google/genai, JSON `responseSchema`),
+  `createGeminiFromEnv` (key stays server-side).
+- `services/planService.ts`: cache → Gemini → one repair retry → local fallback; 20s timeout via
+  `AbortController`; re-normalises the AI budget to the exact total (PRD §8).
+- `services/cache.ts`: LRU (1h TTL) keyed by a SHA-256 of normalized input.
+- `services/promptBuilder.ts` + `services/sanitize.ts`: system/user/repair prompts, type guidance,
+  few-shot from templates; control-char stripping + delimited USER_DATA block (injection guard).
+- `middleware/rateLimit.ts`: 20 req/min/IP on AI routes → friendly JSON 429.
+- `routes/plan.ts`: Zod-validated `POST /api/plan` returning `{ plan, source }`.
+- `app.ts`: DI options (clientDir / planService / aiRateLimit); default service is Gemini-or-fallback.
+
+**Verification (`npm run verify`, all green):**
+
+- Lint 0 · Prettier · `tsc` clean.
+- Vitest: 118 tests / 16 files; coverage 98.3% stmts, 96.7% branches, 97.3% funcs, 98.2% lines
+  (server modules fully covered; Gemini SDK mocked).
+- API tests cover: 200 happy, 400 invalid, 429 rate limit, invalid→repair→fallback, timeout,
+  client error, and no-secret-leak on failure.
+- Build + E2E/axe 16 passed; `npm audit` 0 vulnerabilities. Live smoke: `/api/plan` returns a
+  budget-exact plan; invalid body → 400.
