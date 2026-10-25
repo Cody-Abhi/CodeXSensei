@@ -1,0 +1,17 @@
+.pp-guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pp-guide h3 {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.pp-guide__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}

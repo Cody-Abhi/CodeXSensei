@@ -1,0 +1,23 @@
+.pp-home__headline {
+  font-size: clamp(2.5rem, 1.5rem + 5vw, 5rem);
+  line-height: 0.95;
+  margin-bottom: var(--space-2);
+}
+
+.pp-home__lede {
+  font-size: 1.15rem;
+  margin-bottom: var(--space-4);
+}
+
+.pp-home__types {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+}
+
+.pp-home__types p {
+  margin-top: var(--space-2);
+}

@@ -1,0 +1,41 @@
+.pp-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pp-progress__head {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.pp-progress__track {
+  height: 20px;
+  background: var(--surface-2);
+  border: var(--border);
+  overflow: hidden;
+}
+
+.pp-progress__fill {
+  --fill: var(--green);
+  height: 100%;
+  background-color: var(--fill);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(17, 17, 17, 0.18) 0,
+    rgba(17, 17, 17, 0.18) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  border-right: var(--border);
+  transition: width var(--motion-fast) var(--ease);
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-progress__fill {
+    transition: none;
+  }
+}

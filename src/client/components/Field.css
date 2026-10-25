@@ -1,0 +1,77 @@
+.pp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--space-2);
+}
+
+.pp-field__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.pp-field__req {
+  color: var(--red);
+}
+
+.pp-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: var(--border);
+  border-radius: 0;
+}
+
+textarea.pp-input {
+  min-height: 96px;
+  padding: var(--space-1) var(--space-2);
+  resize: vertical;
+}
+
+.pp-input:focus-visible {
+  outline: var(--focus-width) dashed var(--ink);
+  outline-offset: var(--focus-offset);
+}
+
+.pp-input--error {
+  border-color: var(--red);
+  border-width: var(--border-width);
+}
+
+.pp-field__hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  max-width: none;
+}
+
+.pp-field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--red);
+  max-width: none;
+}
+
+/* In dark mode the base red can dip below 4.5:1 on the dark surface; brighten. */
+:root[data-theme='dark'] .pp-field__error,
+:root[data-theme='dark'] .pp-field__req {
+  color: #ff6b74;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .pp-field__error,
+  :root:not([data-theme='light']) .pp-field__req {
+    color: #ff6b74;
+  }
+}
+
+.pp-field__error-icon {
+  font-size: 1rem;
+  line-height: 1.4;
+}

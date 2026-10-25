@@ -1,0 +1,36 @@
+.pp-toast {
+  --fill: var(--green);
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-3);
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: min(92vw, 420px);
+  padding: var(--space-1) var(--space-2);
+  color: var(--on-accent);
+  background: var(--fill);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  font-weight: 600;
+}
+
+.pp-toast__msg {
+  flex: 1;
+}
+
+.pp-toast__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--on-accent);
+  background: transparent;
+  border: 2px solid var(--ink);
+  cursor: pointer;
+}

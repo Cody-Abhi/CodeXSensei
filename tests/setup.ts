@@ -20,3 +20,16 @@ if (!window.matchMedia) {
     dispatchEvent: vi.fn(),
   }));
 }
+
+// jsdom does not implement <dialog> showModal/close; provide a minimal shim so
+// the Modal component can be tested. Real browsers (Playwright) use the native
+// implementation.
+if (typeof HTMLDialogElement !== 'undefined') {
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement): void {
+    this.open = true;
+  };
+  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement): void {
+    this.open = false;
+    this.dispatchEvent(new Event('close'));
+  };
+}

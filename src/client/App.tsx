@@ -1,27 +1,22 @@
-import { APP_NAME, APP_TAGLINE } from '../shared/version';
+import { Route, Routes } from 'react-router-dom';
+
+import { Layout } from './components/Layout';
+import { Home } from './pages/Home';
+import { StyleGuide } from './pages/StyleGuide';
 
 /**
- * Root application shell. Phase 1 renders accessible landmarks and the brand
- * heading; routes and features are layered on in later phases.
+ * Application routes. The shared {@link Layout} wraps every page; pages supply
+ * their own single `h1`.
+ *
+ * @returns The routed application.
  */
 export function App(): React.JSX.Element {
   return (
-    <>
-      <a className="skip-link" href="#main">
-        Skip to content
-      </a>
-      <header>
-        <nav aria-label="Primary">
-          <strong>{APP_NAME}</strong>
-        </nav>
-      </header>
-      <main id="main">
-        <h1>{APP_NAME}</h1>
-        <p>{APP_TAGLINE}</p>
-      </main>
-      <footer>
-        <p>Your plans stay in your browser. Built for PromptWars.</p>
-      </footer>
-    </>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/style-guide" element={<StyleGuide />} />
+      </Route>
+    </Routes>
   );
 }

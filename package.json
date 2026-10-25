@@ -34,6 +34,8 @@
     "prepare": "husky || true"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
     "@google/genai": "^2.31.0",
     "compression": "^1.8.2",
     "express": "^4.21.2",

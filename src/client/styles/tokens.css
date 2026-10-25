@@ -1,0 +1,86 @@
+/**
+ * PlanPop design tokens — Neobrutalism (PRD §10).
+ * Raw palette + semantic layer. Text on saturated fills is always near-black
+ * (--on-accent) so contrast stays >= 4.5:1 in both light and dark themes.
+ */
+:root {
+  /* Raw palette (PRD §10) */
+  --ink: #111111;
+  --paper: #fffdf5;
+  --yellow: #ffe14d;
+  --pink: #ff7ab6;
+  --blue: #5cc8ff;
+  --green: #7ce577;
+  --orange: #ff9f43;
+  --purple: #b497ff;
+  --red: #e63946;
+
+  /* Constant ink for text/icons sitting on saturated fills (both themes). */
+  --on-accent: #111111;
+
+  /* Structure */
+  --border-width: 3px;
+  --border: var(--border-width) solid var(--ink);
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-sm: 3px 3px 0 var(--ink);
+  --shadow-lg: 10px 10px 0 var(--ink);
+  --radius: 0px; /* cards may opt into 8px */
+  --radius-card: 8px;
+
+  /* Typography */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* 8-pt spacing grid */
+  --space: 8px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  /* Motion (disabled under prefers-reduced-motion) */
+  --motion-fast: 150ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Focus ring (PRD §10 — 4px dashed, offset 3px) */
+  --focus-width: 4px;
+  --focus-offset: 3px;
+
+  /* Semantic surfaces/text */
+  --surface: var(--paper);
+  --surface-2: #ffffff;
+  --text: var(--ink);
+  --muted: #4a4a4a;
+  --z-toast: 1000;
+  --z-modal: 1100;
+
+  /* Event-type accents (PRD §10) — always paired with icon + label. */
+  --event-wedding: var(--pink);
+  --event-birthday: var(--yellow);
+  --event-community: var(--blue);
+}
+
+/* Auto dark mode unless the user forced light via data-theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #1b1b1b;
+    --ink: #f5f5f5;
+    --surface: var(--paper);
+    --surface-2: #242424;
+    --text: var(--ink);
+    --muted: #c9c9c9;
+  }
+}
+
+/* Explicit dark override. */
+:root[data-theme='dark'] {
+  --paper: #1b1b1b;
+  --ink: #f5f5f5;
+  --surface: var(--paper);
+  --surface-2: #242424;
+  --text: var(--ink);
+  --muted: #c9c9c9;
+}

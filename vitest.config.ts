@@ -15,7 +15,12 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/client/main.tsx', 'src/server/index.ts', 'src/**/*.d.ts'],
+      exclude: [
+        'src/client/main.tsx',
+        'src/client/styles/fonts.ts',
+        'src/server/index.ts',
+        'src/**/*.d.ts',
+      ],
       reporter: ['text', 'text-summary', 'html', 'lcov'],
       thresholds: {
         lines: 90,

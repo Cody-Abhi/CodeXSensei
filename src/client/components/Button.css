@@ -1,0 +1,73 @@
+.pp-btn {
+  --fill: var(--yellow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--on-accent);
+  background: var(--fill);
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
+}
+
+.pp-btn--lg {
+  min-height: 52px;
+  font-size: 1.125rem;
+  padding: 0 var(--space-3);
+}
+
+.pp-btn--outline {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.pp-btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
+}
+
+/* Press down: collapse the shadow (PRD §10). */
+.pp-btn:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.pp-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Tone fills — black text keeps contrast >= 4.5:1 on each. */
+.tone-yellow {
+  --fill: var(--yellow);
+}
+.tone-pink {
+  --fill: var(--pink);
+}
+.tone-blue {
+  --fill: var(--blue);
+}
+.tone-green {
+  --fill: var(--green);
+}
+.tone-orange {
+  --fill: var(--orange);
+}
+.tone-purple {
+  --fill: var(--purple);
+}
+.tone-red {
+  --fill: var(--red);
+}

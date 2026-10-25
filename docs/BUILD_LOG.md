@@ -35,3 +35,31 @@ minimal app.
 - Build: client `dist/client` (JS **45.92 KB gzip**, well under the 150 KB budget) + server bundle.
 - Playwright E2E + axe: 6 passed (desktop + mobile Chromium, light + dark, 0 axe violations).
 - `npm audit --audit-level=high`: **0 vulnerabilities**.
+
+## Phase 2 — Neobrutalism design system
+
+**Goal:** design tokens + 8 reusable components + a demo route, light/dark/print, reduced-motion,
+axe 0.
+
+**Built:**
+
+- `styles/tokens.css` (exact PRD §10 palette + semantic layer, auto + explicit dark, 8-pt grid,
+  focus/motion tokens) and `styles/base.css` (reset, typography, global 4px dashed focus ring,
+  `.visually-hidden`, skip link, print view, `prefers-reduced-motion`).
+- Self-hosted fonts via `@fontsource` (Inter + Space Grotesk) under the strict same-origin CSP.
+- Components: Button (press-down + 7 tones), Card (coloured header strip), Badge, Field
+  (render-prop with `aria-describedby`/`aria-invalid`/`aria-required`), ProgressBar
+  (`role="progressbar"` + numeric %), Modal (native `<dialog>`, Esc + focus return), Toast
+  (`role="status"`), SkipLink, plus a ThemeToggle backed by a Zustand theme store.
+- Routing (react-router) with a `Layout`, a `Home` hero + event-type cards, and a `/style-guide`
+  demo route exercising every component.
+
+**Verification (`npm run verify`, all green):**
+
+- Lint 0 warnings · Prettier clean · `tsc` clean.
+- Vitest: 39 tests / 6 files; coverage 95.9% stmts, 94.1% branches, 93.6% funcs, 95.7% lines
+  (all ≥ 90%).
+- Build: client JS **62.1 KB gzip** (< 150 KB budget); server bundle.
+- Playwright E2E + axe: 16 passed — axe 0 violations on `/` and `/style-guide`, light + dark,
+  desktop + mobile, including an open modal; skip-link is first focusable.
+- `npm audit`: 0 vulnerabilities.
