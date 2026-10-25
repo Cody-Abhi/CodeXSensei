@@ -63,3 +63,28 @@ axe 0.
 - Playwright E2E + axe: 16 passed — axe 0 violations on `/` and `/style-guide`, light + dark,
   desktop + mobile, including an open modal; skip-link is first focusable.
 - `npm audit`: 0 vulnerabilities.
+
+## Phase 3 — Shared schemas & money/date utils (TDD)
+
+**Goal:** Zod schemas (strict) + integer money math + date back-scheduling + rule-based fallback
+templates, 100% unit coverage on `shared/`.
+
+**Built:**
+
+- `shared/schemas.ts`: `z.strictObject` schemas (EventInput with future-date refinement, Plan,
+  Budget/Timeline/Vendor/Idea, ChatRequest, IdeasRegenerate, PlanPatch, ChatResult) + `types.ts`
+  inferring all types from the schemas.
+- `shared/money.ts`: integer minor-unit helpers — `toMinor`, `sumMinor`, `percentOf`, `isOverspent`,
+  `formatMinor` (Intl), and `normaliseBudget` (scales weights to the exact budget, remainder to the
+  largest categories).
+- `shared/dates.ts`: `toISODate`, `parseISODate`, `addDays`, `daysBetween`, `daysUntil`,
+  `isFutureISODate`, and `backSchedule` (milestones back-scheduled from the event date).
+- `shared/templates/`: data-driven `buildFallbackPlan` for wedding / birthday / community — budget
+  re-normalised to the exact input budget, contingency ≥5%, personalized ideas from vibes.
+
+**Verification (`npm run verify`, all green):**
+
+- Lint 0 warnings · Prettier clean · `tsc` clean.
+- Vitest: 88 tests / 10 files. **`shared/` is 100% on all metrics**; overall 97.5% stmts, 95.5%
+  branches, 96.1% funcs, 97.3% lines.
+- Build + Playwright E2E + axe: 16 passed. `npm audit`: 0 vulnerabilities.
