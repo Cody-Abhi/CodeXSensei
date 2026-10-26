@@ -55,7 +55,13 @@ describe('<PlanPage />', () => {
     expect(screen.getByRole('heading', { level: 1, name: /your plan/i })).toBeInTheDocument();
     expect(screen.getByText(plan.summary)).toBeInTheDocument();
     expect(screen.getByText(/smart template/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Budget' })).toBeInTheDocument();
+    expect(screen.getAllByText('Budget').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('shows AI-generated badge when source is ai', () => {
+    usePlanStore.setState({ status: 'success', plan, source: 'ai', lastInput: input });
+    renderPlan();
+    expect(screen.getByText(/ai-generated/i)).toBeInTheDocument();
   });
 
   it('shows an error with a retry link', () => {

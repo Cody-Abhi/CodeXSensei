@@ -6,9 +6,12 @@ import type { Currency } from '../../../shared/types';
 import { usePlanStore } from '../../store/planStore';
 import { BudgetSection } from './BudgetSection';
 import { ChatSection } from './ChatSection';
+import { Dashboard } from './Dashboard';
+import { ExportSection } from './ExportSection';
 import { IdeasSection } from './IdeasSection';
 import { TimelineSection } from './TimelineSection';
 import { VendorSection } from './VendorSection';
+import './ExportSection.css';
 import './PlanPage.css';
 
 /** Loading skeletons shown while a plan is generated. */
@@ -71,6 +74,7 @@ export function PlanPage(): React.JSX.Element {
                 {source === 'fallback' ? 'Smart template' : 'AI-generated'}
               </Badge>
             </p>
+            <Dashboard />
             <Card title="Summary" headerTone="yellow">
               <p>{plan.summary}</p>
             </Card>
@@ -87,6 +91,7 @@ export function PlanPage(): React.JSX.Element {
             />
             <IdeasSection ideas={plan.ideas} />
             <ChatSection />
+            <ExportSection />
           </div>
         )}
       </div>

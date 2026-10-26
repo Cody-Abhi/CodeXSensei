@@ -77,6 +77,20 @@ describe('<VendorSection />', () => {
     }
   });
 
+  it('shows vendor cost when costMinor is set', () => {
+    const withCost = {
+      ...plan,
+      vendors: plan.vendors.map((v, i) => (i === 0 ? { ...v, costMinor: 50000 } : v)),
+    };
+    usePlanStore.setState({ plan: withCost, status: 'success', lastInput: input });
+    render(
+      <MemoryRouter>
+        <VendorSection vendors={withCost.vendors} currency="INR" city="Jaipur" />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText(/₹500/)).toBeInTheDocument();
+  });
+
   it('groups vendors by category', () => {
     renderVendors();
     const categories = [...new Set(plan.vendors.map((v) => v.category))];

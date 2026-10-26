@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TimelineSection } from '../../src/client/features/plan/TimelineSection';
 import { usePlanStore } from '../../src/client/store/planStore';
@@ -93,5 +93,30 @@ describe('<TimelineSection />', () => {
   it('has a download .ics button', () => {
     renderTimeline();
     expect(screen.getByRole('button', { name: /download \.ics/i })).toBeInTheDocument();
+  });
+
+  it('triggers ICS download on button click', async () => {
+    const user = userEvent.setup();
+    renderTimeline();
+    const revokeURL = vi.spyOn(URL, 'revokeObjectURL').mockReturnValue(undefined);
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    const clickSpy = vi.fn();
+    const removeSpy = vi.fn();
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+      if (tag === 'a') {
+        return {
+          set href(_v: string) {},
+          set download(_v: string) {},
+          click: clickSpy,
+          remove: removeSpy,
+        } as unknown as HTMLAnchorElement;
+      }
+      return origCreateElement(tag);
+    });
+    vi.spyOn(document.body, 'appendChild').mockReturnValue(null as unknown as Node);
+    await user.click(screen.getByRole('button', { name: /download \.ics/i }));
+    expect(clickSpy).toHaveBeenCalled();
+    revokeURL.mockRestore();
   });
 });

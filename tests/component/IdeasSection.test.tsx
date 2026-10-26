@@ -79,4 +79,16 @@ describe('<IdeasSection />', () => {
     await user.click(buttons[0]!);
     expect(regenerateSpy).toHaveBeenCalled();
   });
+
+  it('shows Loading text when ideasLoading is true', () => {
+    usePlanStore.setState({ plan, status: 'success', lastInput: input, ideasLoading: true });
+    render(
+      <MemoryRouter>
+        <IdeasWrapper />
+      </MemoryRouter>,
+    );
+    const buttons = screen.getAllByRole('button', { name: /regenerate/i });
+    expect(buttons[0]).toHaveTextContent(/loading/i);
+    expect(buttons[0]).toBeDisabled();
+  });
 });

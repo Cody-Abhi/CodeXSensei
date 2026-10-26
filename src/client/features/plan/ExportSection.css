@@ -1,0 +1,11 @@
+.pp-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+@media print {
+  .pp-export {
+    display: none;
+  }
+}

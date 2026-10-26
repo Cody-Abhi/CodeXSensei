@@ -31,6 +31,11 @@ describe('generateICS', () => {
     expect(ics).toContain('SUMMARY:Hello\\; world\\, test\\\\more');
   });
 
+  it('escapes newlines in descriptions', () => {
+    const ics = generateICS([{ title: 'Test', date: '2099-01-01', description: 'line1\nline2' }]);
+    expect(ics).toContain('DESCRIPTION:line1\\nline2');
+  });
+
   it('uses CRLF line endings', () => {
     const ics = generateICS([{ title: 'Test', date: '2099-01-01' }]);
     expect(ics).toContain('\r\n');

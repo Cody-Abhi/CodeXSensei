@@ -43,7 +43,7 @@ for (const c of cases) {
     await expect(page).toHaveURL(/\/plan$/);
     await expect(page.getByRole('heading', { level: 1, name: /your plan/i })).toBeVisible();
     await expect(page.getByText(c.name, { exact: false }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Budget' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: 'Budget' })).toBeVisible();
   });
 }
 
@@ -68,7 +68,7 @@ test.describe('wizard & plan accessibility', () => {
     });
     await page.getByRole('button', { name: /next/i }).click();
     await page.getByRole('button', { name: /generate my plan/i }).click();
-    await expect(page.getByRole('heading', { name: 'Budget' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: 'Budget' })).toBeVisible();
     const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(results.violations).toEqual([]);
   });

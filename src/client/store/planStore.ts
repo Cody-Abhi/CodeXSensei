@@ -9,6 +9,7 @@ import type {
   VendorStatus,
 } from '../../shared/types';
 import { postChat, postPlan, postRegenerateIdeas } from '../api/client';
+import { clearSavedPlan, loadPlan, savePlan } from './persistence';
 
 /** Generation lifecycle status. */
 export type PlanStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -91,7 +92,8 @@ export const usePlanStore = create<PlanState>((set, get) => ({
     }
   },
   setPlan: (plan) => set({ plan }),
-  reset: () =>
+  reset: () => {
+    clearSavedPlan();
     set({
       plan: null,
       source: null,
@@ -102,7 +104,8 @@ export const usePlanStore = create<PlanState>((set, get) => ({
       chatLoading: false,
       pendingPatch: null,
       ideasLoading: false,
-    }),
+    });
+  },
   updateBudgetItem: (index, amountMinor) => {
     set((state) => {
       if (!state.plan) return {};
@@ -199,3 +202,21 @@ export const usePlanStore = create<PlanState>((set, get) => ({
     }
   },
 }));
+
+// Hydrate from localStorage on startup.
+const saved = loadPlan();
+if (saved) {
+  usePlanStore.setState({
+    plan: saved.plan,
+    source: saved.source,
+    lastInput: saved.lastInput,
+    status: 'success',
+  });
+}
+
+// Auto-save plan changes to localStorage.
+usePlanStore.subscribe((state) => {
+  if (state.plan && state.lastInput && state.status === 'success') {
+    savePlan(state.plan, state.source ?? 'unknown', state.lastInput);
+  }
+});
