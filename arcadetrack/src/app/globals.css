@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #FFF8E7;
+  --ink: #000000;
+  --white: #FFFFFF;
+  --yellow: #FFD23F;
+  --pink: #FF6B9D;
+  --blue: #4D96FF;
+  --green: #6BCB77;
+  --orange: #FF8C42;
+  --purple: #A66CFF;
+
+  --tier-trooper: var(--green);
+  --tier-ranger: var(--blue);
+  --tier-champion: var(--purple);
+  --tier-legend: var(--yellow);
+
+  --border: 3px solid var(--ink);
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-sm: 3px 3px 0 var(--ink);
+  --shadow-hover: 9px 9px 0 var(--ink);
+  --radius: 0px;
+}
+
+@layer base {
+  html { background: var(--bg); }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 500;
+    background-image:
+      linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  h1, h2, h3 { font-weight: 800; letter-spacing: -0.01em; }
+  :focus-visible { outline: 4px solid var(--yellow); outline-offset: 2px; box-shadow: 0 0 0 2px var(--ink); }
+  img { border-radius: var(--radius); }
+}
+
+@layer components {
+  .stripes {
+    background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.18) 0 8px, transparent 8px 16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
