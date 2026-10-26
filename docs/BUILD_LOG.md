@@ -117,3 +117,89 @@ exact-budget normalisation, LRU cache, prompt-injection guard, rate limiting —
   client error, and no-secret-leak on failure.
 - Build + E2E/axe 16 passed; `npm audit` 0 vulnerabilities. Live smoke: `/api/plan` returns a
   budget-exact plan; invalid body → 400.
+
+## Phase 5 — Wizard F1 + Plan generation F2
+
+**Goal:** 3-step wizard (type → details → preferences), inline a11y validation, plan generation
+with skeletons + aria-busy, aria-live result.
+
+**Built:**
+
+- `features/wizard/Wizard.tsx`: 3-step flow with radio type selection, date/city/guests/budget
+  fields with inline validation, vibes/dietary preference chips. Accessible: aria-current step,
+  error summary with focus, aria-describedby hints.
+- `features/wizard/wizardModel.ts`: state machine with validation per step, field accessors.
+- `api/client.ts`: `postPlan` fetch with rate-limit retry (429 → wait → retry once).
+- `store/planStore.ts`: Zustand store with `generatePlan` action, status/error/source tracking.
+- PlanPage with skeletons (`aria-busy`), aria-live region, error state + retry link, source badge.
+
+**Verification:** 149 tests / 22 files; coverage 96.3% stmts, 90.4% branches, 95.1% funcs,
+96.2% lines. E2E 26 passed (3 event types × 2 viewports + 2 axe + smoke). 0 axe violations.
+
+## Phase 6 — Budget F3 + Timeline F4 + Vendors F5
+
+**Goal:** editable budget table with overspend + SVG bar chart; back-scheduled milestones with
+done/overdue + .ics + GCal links; vendor checklist by category + status cycling + Maps links.
+
+**Built:**
+
+- `BudgetSection`: editable amount inputs per category, overspend warning (red), inline SVG bar
+  chart with `role="img"` + `aria-label` + visually-hidden data table fallback.
+- `TimelineSection`: milestone checkboxes (done/overdue), phase grouping, GCal links, ICS download.
+- `VendorSection`: category grouping, status cycling (to find → contacted → booked), Maps links,
+  progress bar.
+- `icsExport.ts`: RFC-5545 ICS generation + blob download; `gcalLink` URL builder.
+- Store actions: `updateBudgetItem`, `toggleMilestoneDone`, `cycleVendorStatus`.
+
+**Verification:** 184 tests / 27 files; coverage 94.2% stmts, 90.5% branches, 94.8% funcs,
+95.2% lines. 26 E2E passed; 0 axe violations.
+
+## Phase 7 — Ideas + Chat F6
+
+**Goal:** idea cards with regenerate-per-category; `/api/chat` SSE → `{reply, patch?}` with
+diff-preview accept/reject.
+
+**Built:**
+
+- `IdeasSection`: ideas grouped by category, regenerate button per category (loading state).
+- `ChatSection`: message history, typing indicator, pending patch with accept/reject UI.
+- Server services: `chatService` (Gemini streaming → reply + optional JSON patch),
+  `ideasService` (per-category regeneration with fallback).
+- Routes: `POST /api/chat` (SSE stream), `POST /api/ideas/regenerate`.
+- Store: `sendChat`, `acceptPatch`, `rejectPatch`, `regenerateIdeas`, `applyPatch`, `replaceIdeas`.
+
+**Verification:** 222 tests / 32 files; coverage 91.2% stmts, 90.6% branches, 93.3% funcs,
+92.5% lines. 26 E2E passed; 0 axe violations.
+
+## Phase 8 — Dashboard + Persistence + Export F7–F8
+
+**Goal:** dashboard (countdown/health/progress), versioned localStorage with migration + try/catch,
+print view, copy-Markdown, download-JSON.
+
+**Built:**
+
+- `Dashboard`: countdown timer with green/orange/red zones, budget/timeline/vendor progress bars.
+- `persistence.ts`: versioned localStorage (`planpop_v1`), schema validation on load, try/catch
+  on all storage access.
+- `planStore.ts`: auto-save on plan changes via `subscribe()`, hydration on load, clear on reset.
+- `exportPlan.ts`: `planToMarkdown` (headings, checklists, budget, vendors, ideas, attribution),
+  `downloadJSON` (blob download), `copyToClipboard`.
+- `ExportSection`: Copy Markdown, Download JSON, Print buttons.
+- Print CSS: export section hidden in `@media print`.
+
+**Verification:** 266 tests / 35 files; coverage 96.8% stmts, 91.5% branches, 96.6% funcs,
+97.9% lines. 26 E2E passed; 0 axe violations.
+
+## Phase 9 — Hardening
+
+**Goal:** Lighthouse ≥ 95/100/100/100, bundle < 150 KB gz, code-splitting, `npm audit` 0 high/crit,
+finalize all docs.
+
+**Built:**
+
+- Code-splitting with `React.lazy` for Wizard, PlanPage, StyleGuide routes — initial bundle
+  dropped from 94 KB gz to **62 KB gz**; lazy chunks add 2.7–5 KB each on navigation.
+- `npm audit`: **0 vulnerabilities**.
+- `git grep -i AIza`: only test assertions (no leaked keys).
+- Finalized SECURITY.md, A11Y.md, ARCHITECTURE.md, DECISIONS.md, BUILD_LOG.md, README.
+- Coverage: 96.8% stmts, 91.5% branches, 96.6% funcs, 97.9% lines (all ≥ 90%).

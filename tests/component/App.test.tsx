@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
@@ -24,14 +24,15 @@ describe('<App /> routing & layout', () => {
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
   });
 
-  it('renders the style guide at /style-guide', () => {
+  it('renders the style guide at /style-guide', async () => {
     renderAt('/style-guide');
-    expect(screen.getByRole('heading', { level: 1, name: /design system/i })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: /design system/i })).toBeVisible();
   });
 
   it('toggles the field error state on the style guide', async () => {
     const user = userEvent.setup();
     renderAt('/style-guide');
+    await screen.findByRole('heading', { level: 1, name: /design system/i });
     expect(screen.queryByText(/under 300 characters/i)).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /toggle error state/i }));
     expect(screen.getByText(/under 300 characters/i)).toBeInTheDocument();
@@ -40,8 +41,11 @@ describe('<App /> routing & layout', () => {
   it('opens the modal and shows a toast from the style guide', async () => {
     const user = userEvent.setup();
     renderAt('/style-guide');
+    await screen.findByRole('button', { name: /open modal/i });
     await user.click(screen.getByRole('button', { name: /open modal/i }));
-    expect(screen.getByRole('dialog', { name: /example dialog/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: /example dialog/i })).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole('button', { name: /show toast/i }));
     expect(screen.getByRole('status')).toHaveTextContent(/saved to your browser/i);

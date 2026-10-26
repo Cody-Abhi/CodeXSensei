@@ -1,0 +1,22 @@
+/* Shared tone utility classes — set --fill for any component (Button, Card, etc.). */
+.tone-yellow {
+  --fill: var(--yellow);
+}
+.tone-pink {
+  --fill: var(--pink);
+}
+.tone-blue {
+  --fill: var(--blue);
+}
+.tone-green {
+  --fill: var(--green);
+}
+.tone-orange {
+  --fill: var(--orange);
+}
+.tone-purple {
+  --fill: var(--purple);
+}
+.tone-red {
+  --fill: var(--red);
+}

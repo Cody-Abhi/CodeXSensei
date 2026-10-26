@@ -49,25 +49,4 @@
   box-shadow: none;
 }
 
-/* Tone fills — black text keeps contrast >= 4.5:1 on each. */
-.tone-yellow {
-  --fill: var(--yellow);
-}
-.tone-pink {
-  --fill: var(--pink);
-}
-.tone-blue {
-  --fill: var(--blue);
-}
-.tone-green {
-  --fill: var(--green);
-}
-.tone-orange {
-  --fill: var(--orange);
-}
-.tone-purple {
-  --fill: var(--purple);
-}
-.tone-red {
-  --fill: var(--red);
-}
+/* Tone fills are in styles/tones.css (loaded globally via main.tsx). */
