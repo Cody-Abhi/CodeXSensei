@@ -1,4 +1,4 @@
-import { BADGE_TYPES, TYPE_META } from '@/config/arcade';
+import { COUNTED_TYPES, TYPE_META } from '@/config/arcade';
 import { formatDay } from '@/lib/badges';
 import type { Badge, BadgeType } from '@/lib/types';
 import { Card } from '@/components/ui/Card';
@@ -61,15 +61,15 @@ export function BadgeGrid({ badges, newIds, onOverride }: Props) {
               </details>
             )}
             <label className="mt-auto block text-xs font-bold uppercase">
-              Type
+              Category
               <select
                 aria-label={`Type for ${b.title}`}
                 className="mt-1 h-10 w-full border-3 border-ink bg-white px-2 font-mono text-sm focus:bg-yellow"
                 value={b.overridden ? b.type : ''}
                 onChange={(e) => onOverride(b.id, (e.target.value || null) as BadgeType | null)}
               >
-                <option value="">Auto ({TYPE_META[b.type].label})</option>
-                {BADGE_TYPES.map((t) => (
+                <option value="">{b.overridden ? 'Auto-detect' : `Auto (${TYPE_META[b.type].label})`}</option>
+                {COUNTED_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {TYPE_META[t].label}
                   </option>

@@ -1,4 +1,4 @@
-import { BADGE_TYPES, SEASON, TYPE_META } from '@/config/arcade';
+import { COUNTED_TYPES, SEASON, TYPE_META } from '@/config/arcade';
 import { formatMonth } from '@/lib/badges';
 import type { BadgeType } from '@/lib/types';
 import { cx } from '@/components/ui/cx';
@@ -48,7 +48,7 @@ export function Filters({ state, months, onChange, counts }: Props) {
       </div>
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Badge type">
-        {(['ALL', ...BADGE_TYPES] as const).map((t) => (
+        {(['ALL', ...COUNTED_TYPES] as const).map((t) => (
           <button
             key={t}
             type="button"

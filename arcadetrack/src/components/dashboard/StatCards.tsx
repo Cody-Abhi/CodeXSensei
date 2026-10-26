@@ -2,18 +2,17 @@ import { TYPE_META } from '@/config/arcade';
 import { Card } from '@/components/ui/Card';
 import { skillPairingHint, type PointsBreakdown } from '@/lib/points';
 
-export function StatCards({ b, lifetimeTotal }: { b: PointsBreakdown; lifetimeTotal: number }) {
+export function StatCards({ b, lifetimeTotal, notCounted }: { b: PointsBreakdown; lifetimeTotal: number; notCounted: number }) {
   const stats = [
     { label: 'Games', value: b.games, pts: b.gamePoints, colorVar: TYPE_META.GAME.colorVar },
     { label: 'Trivia', value: b.trivia, pts: b.triviaPoints, colorVar: TYPE_META.TRIVIA.colorVar },
     { label: 'Skill Badges', value: b.skills, colorVar: TYPE_META.SKILL.colorVar },
-    { label: 'Other', value: b.other, colorVar: TYPE_META.OTHER.colorVar },
-    { label: 'Total badges', value: b.total, colorVar: '--yellow' },
+    { label: 'Total counted', value: b.total, colorVar: '--yellow' },
   ];
   const hint = skillPairingHint(b.skills);
   return (
     <section aria-label="Season stats" className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5 lg:gap-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
         {stats.map((s, i) => (
           <Card
             key={s.label}
@@ -30,7 +29,8 @@ export function StatCards({ b, lifetimeTotal }: { b: PointsBreakdown; lifetimeTo
         {hint.text} <span className="font-mono">({b.skillPoints} pt{b.skillPoints === 1 ? '' : 's'} from skills)</span>
       </p>
       <p className="font-mono text-xs">
-        Season counts only. Lifetime: {lifetimeTotal} badge{lifetimeTotal === 1 ? '' : 's'}.
+        Season counts only. Lifetime: {lifetimeTotal} Game / Trivia / Skill badge{lifetimeTotal === 1 ? '' : 's'}.
+        {notCounted > 0 && ` ${notCounted} other badge${notCounted === 1 ? '' : 's'} (courses, facilitator) not counted.`}
       </p>
     </section>
   );

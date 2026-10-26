@@ -35,7 +35,7 @@ describe('calcPoints', () => {
       raw('Cloud Digital Leader course completion'),
     ];
     const r = calcPoints(buildBadges(badges));
-    expect(r).toMatchObject({ games: 1, trivia: 2, other: 1, points: 3, total: 4 });
+    expect(r).toMatchObject({ games: 1, trivia: 2, other: 1, points: 3, total: 3 });
   });
 
   it('adds facilitator bonus and ignores negative bonus', () => {

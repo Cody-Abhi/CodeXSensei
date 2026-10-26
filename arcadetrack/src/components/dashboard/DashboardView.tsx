@@ -33,6 +33,7 @@ export function DashboardView() {
   const [filters, setFilters] = useState<FilterState>(INITIAL);
   const [autoScoped, setAutoScoped] = useState(false);
   const [limit, setLimit] = useState<number>(UI.badgePageSize);
+  const [showUncounted, setShowUncounted] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<{ code: ErrorCode; message: string } | null>(null);
@@ -40,7 +41,10 @@ export function DashboardView() {
 
   const badges = useMemo(() => (profile ? buildBadges(profile.badges, profile.overrides) : []), [profile]);
   const breakdown = useMemo(() => calcPoints(badges, profile?.facilitatorBonus ?? 0), [badges, profile?.facilitatorBonus]);
-  const seasonCount = badges.filter((b) => b.inSeason).length;
+  // Only Game / Trivia / Skill badges are tracked; everything else is "not counted" and hidden unless asked for.
+  const counted = useMemo(() => badges.filter((b) => b.type !== 'OTHER'), [badges]);
+  const uncountedCount = badges.length - counted.length;
+  const seasonCount = counted.filter((b) => b.inSeason).length;
 
   // A profile with nothing in the current season starts on the Lifetime view instead of an empty grid.
   useEffect(() => {
@@ -50,7 +54,10 @@ export function DashboardView() {
     }
   }, [profile, autoScoped, seasonCount]);
 
-  const scoped = useMemo(() => badges.filter((b) => filters.scope === 'lifetime' || b.inSeason), [badges, filters.scope]);
+  const scoped = useMemo(
+    () => (showUncounted ? badges : counted).filter((b) => filters.scope === 'lifetime' || b.inSeason),
+    [badges, counted, showUncounted, filters.scope],
+  );
   const months = useMemo(
     () => [...new Set(scoped.map((b) => monthKey(b.earnedAt)).filter((m): m is string => !!m))].sort().reverse(),
     [scoped],
@@ -129,7 +136,7 @@ export function DashboardView() {
 
       <ProfileHeader name={profile.name} avatar={profile.avatar} memberSince={profile.memberSince} points={breakdown.points} />
       <TierProgress points={breakdown.points} />
-      <StatCards b={breakdown} lifetimeTotal={badges.length} />
+      <StatCards b={breakdown} lifetimeTotal={counted.length} notCounted={uncountedCount} />
 
       <section aria-labelledby="badges-h" className="space-y-4">
         <h2 id="badges-h" className="text-2xl uppercase">
@@ -140,10 +147,10 @@ export function DashboardView() {
             Read {profile.stats.foundOnPage} badge{profile.stats.foundOnPage === 1 ? '' : 's'} from the public profile page
             {profile.stats.duplicatesMerged > 0 && ` · ${profile.stats.duplicatesMerged} duplicate title${profile.stats.duplicatesMerged === 1 ? '' : 's'} merged`}
             {profile.stats.leagues.length > 0 && ` · ${profile.stats.leagues.join(', ')}`}
-            {` · ${badges.length} tracked`}
+            {` · ${counted.length} counted (Game / Trivia / Skill)`}
           </p>
         )}
-        {badges.length === 0 ? (
+        {counted.length === 0 && uncountedCount === 0 ? (
           <Card className="space-y-3">
             <p className="text-lg font-bold">No badges on this profile yet.</p>
             <a
@@ -161,8 +168,19 @@ export function DashboardView() {
               state={filters}
               months={months}
               onChange={patch}
-              counts={{ season: seasonCount, lifetime: badges.length }}
+              counts={{ season: seasonCount, lifetime: counted.length }}
             />
+            {uncountedCount > 0 && (
+              <Button variant="white" onClick={() => { setShowUncounted((v) => !v); setLimit(UI.badgePageSize); }} aria-pressed={showUncounted}>
+                {showUncounted ? 'Hide' : 'Show'} {uncountedCount} not-counted badge{uncountedCount === 1 ? '' : 's'}
+              </Button>
+            )}
+            {showUncounted && (
+              <p className="border-3 border-ink bg-white p-3 text-sm">
+                These are courses, facilitator badges and anything not recognised as a Game, Trivia or Skill badge. They earn no points.
+                If one is really a Game, Trivia or Skill badge, set its Category below and it will be counted.
+              </p>
+            )}
             <p className="font-mono text-sm" aria-live="polite">
               Showing {Math.min(limit, visible.length)} of {visible.length}
               {filters.scope === 'season' && ` · ${SEASON.label} only`}
@@ -171,7 +189,7 @@ export function DashboardView() {
               <Card>
                 <p className="font-bold">No badges match these filters.</p>
                 {filters.scope === 'season' && seasonCount === 0 && (
-                  <p className="mt-1 text-sm">Nothing earned in {SEASON.label} yet. Switch to Lifetime to see all {badges.length} badges.</p>
+                  <p className="mt-1 text-sm">Nothing earned in {SEASON.label} yet. Switch to Lifetime to see all {counted.length} badges.</p>
                 )}
               </Card>
             ) : (

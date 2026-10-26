@@ -5,6 +5,7 @@ export interface PointsBreakdown {
   games: number;
   trivia: number;
   skills: number;
+  /** Badges that are none of Game / Trivia / Skill (courses, facilitator): never counted. */
   other: number;
   /** Points earned by game / trivia badges (may exceed the badge count when a badge states more than 1). */
   gamePoints: number;
@@ -40,7 +41,7 @@ export function calcPoints(badges: Badge[], facilitatorBonus = 0): PointsBreakdo
   const skillPoints = Math.floor(skills / POINTS.skillBadgesPerPoint);
   const bonus = Math.max(0, facilitatorBonus);
   const points = gamePoints + triviaPoints + skillPoints + bonus;
-  return { games, trivia, skills, other, gamePoints, triviaPoints, total: games + trivia + skills + other, skillPoints, bonus, points };
+  return { games, trivia, skills, other, gamePoints, triviaPoints, total: games + trivia + skills, skillPoints, bonus, points };
 }
 
 export interface TierInfo {

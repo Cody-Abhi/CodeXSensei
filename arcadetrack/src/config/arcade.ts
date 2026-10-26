@@ -47,21 +47,24 @@ export const CLASSIFY = {
   neverGame: /facilitator/i,
   game: /arcade|base camp|level\s*\d|skills boost arcade|certification zone|\bgames?\b/i,
   /**
-   * Course-catalog badges whose dialog text says they are a (singular) skill badge, e.g.
+   * Course-catalog badges whose dialog text calls them a (singular) skill badge, e.g.
    * "Earn a skill badge by completing ..." / "Complete the introductory X skill badge to demonstrate".
+   * Google's own skill-badge pages use this wording; ordinary courses say "Earn a badge today!".
    * Plural "Skill Badges" is excluded: foundation courses merely point learners at them.
    */
-  skillDescription: /\b(?:earn|complete)\b[^.]{0,120}\bskill badge(?!s)\b/i,
+  skillDescription: /\bskill badge\b(?!s)/i,
 } as const;
 
 export const TYPE_META: Record<BadgeType, { label: string; colorVar: string }> = {
   GAME: { label: 'Game', colorVar: '--pink' },
   TRIVIA: { label: 'Trivia', colorVar: '--orange' },
   SKILL: { label: 'Skill Badge', colorVar: '--blue' },
-  OTHER: { label: 'Other', colorVar: '--white' },
+  /** Not a category: anything that is not a Game, Trivia or Skill badge (courses, facilitator badges). */
+  OTHER: { label: 'Not counted', colorVar: '--white' },
 };
 
-export const BADGE_TYPES: readonly BadgeType[] = ['GAME', 'TRIVIA', 'SKILL', 'OTHER'];
+/** The only three categories shown to users (filters, stats, overrides). */
+export const COUNTED_TYPES: readonly BadgeType[] = ['GAME', 'TRIVIA', 'SKILL'];
 
 export const PROFILE = {
   /** Hosts we are willing to fetch from (SSRF guard). */
