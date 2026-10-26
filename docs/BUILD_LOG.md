@@ -203,3 +203,21 @@ finalize all docs.
 - `git grep -i AIza`: only test assertions (no leaked keys).
 - Finalized SECURITY.md, A11Y.md, ARCHITECTURE.md, DECISIONS.md, BUILD_LOG.md, README.
 - Coverage: 96.8% stmts, 91.5% branches, 96.6% funcs, 97.9% lines (all ≥ 90%).
+- Fixed dark-mode axe contrast violation: extracted `.tone-*` utility classes from Button.css to
+  shared `tones.css` (loaded globally), ensuring Card strips always resolve `--fill` for their
+  background rather than falling back to `--surface-2`.
+
+## Phase 10 — Deploy & demo script
+
+**Goal:** Finalize Dockerfile for Cloud Run, provide exact deploy commands with Secret Manager
+integration, demo script covering 3 event-type flows.
+
+**Built:**
+
+- Dockerfile already production-ready from Phase 1: multi-stage build, non-root `node` user,
+  `NODE_ENV=production`, port 8080, `npm ci --omit=dev`.
+- README updated with step-by-step Cloud Run deploy instructions: enable APIs, create secret in
+  Secret Manager, `gcloud run deploy` with `--set-secrets`, memory/CPU/scaling config.
+- `docs/DEMO_SCRIPT.md`: 3 end-to-end demo flows (Wedding, Birthday, Community Event) exercising
+  wizard → plan → budget editing → timeline/ICS/GCal → vendor status → ideas regeneration →
+  chat refinement → export → persistence → dark mode → accessibility audit.
