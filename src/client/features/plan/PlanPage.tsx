@@ -5,6 +5,8 @@ import { Card } from '../../components/Card';
 import type { Currency } from '../../../shared/types';
 import { usePlanStore } from '../../store/planStore';
 import { BudgetSection } from './BudgetSection';
+import { ChatSection } from './ChatSection';
+import { IdeasSection } from './IdeasSection';
 import { TimelineSection } from './TimelineSection';
 import { VendorSection } from './VendorSection';
 import './PlanPage.css';
@@ -83,16 +85,8 @@ export function PlanPage(): React.JSX.Element {
               currency={currency}
               city={lastInput?.city ?? ''}
             />
-            <Card title="Ideas" headerTone="purple">
-              <ul className="pp-plan__ideas">
-                {plan.ideas.map((idea) => (
-                  <li key={idea.id}>
-                    <strong>{idea.title}</strong>
-                    <span className="pp-plan__muted"> — {idea.description}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            <IdeasSection ideas={plan.ideas} />
+            <ChatSection />
           </div>
         )}
       </div>

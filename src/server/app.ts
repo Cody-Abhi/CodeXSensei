@@ -13,10 +13,14 @@ import express, {
 import helmet from 'helmet';
 
 import { createAiRateLimiter } from './middleware/rateLimit';
+import { createChatRouter } from './routes/chat';
 import { healthRouter } from './routes/health';
+import { createIdeasRouter } from './routes/ideas';
 import { createPlanRouter, type PlanGenerator } from './routes/plan';
 import { createPlanCache } from './services/cache';
+import { createChatService, type ChatService } from './services/chatService';
 import { createGeminiFromEnv } from './services/gemini';
+import { createIdeasService, type IdeasService } from './services/ideasService';
 import { createPlanService } from './services/planService';
 
 /** Maximum accepted JSON body size (PRD §9). */
@@ -28,6 +32,10 @@ export interface CreateAppOptions {
   clientDir?: string;
   /** Plan generator; defaults to a Gemini-or-fallback service. */
   planService?: PlanGenerator;
+  /** Chat service; defaults to a Gemini-backed chat service. */
+  chatService?: ChatService;
+  /** Ideas service; defaults to a Gemini-backed ideas service. */
+  ideasService?: IdeasService;
   /** Rate limiter for AI routes; defaults to {@link createAiRateLimiter}. */
   aiRateLimit?: RequestHandler;
 }
@@ -147,8 +155,11 @@ function serveClient(app: Express, clientDir: string): void {
  * @returns A configured Express application.
  */
 export function createApp(options: CreateAppOptions = {}): Express {
+  const geminiClient = createGeminiFromEnv();
   const clientDir = options.clientDir ?? resolveClientDir();
   const planService = options.planService ?? createDefaultPlanService();
+  const chatService = options.chatService ?? createChatService({ client: geminiClient });
+  const ideasService = options.ideasService ?? createIdeasService({ client: geminiClient });
   const aiRateLimit = options.aiRateLimit ?? createAiRateLimiter();
 
   const app = express();
@@ -159,7 +170,11 @@ export function createApp(options: CreateAppOptions = {}): Express {
 
   app.use('/api', healthRouter);
   app.use('/api/plan', aiRateLimit);
+  app.use('/api/chat', aiRateLimit);
+  app.use('/api/ideas', aiRateLimit);
   app.use('/api', createPlanRouter(planService));
+  app.use('/api', createChatRouter(chatService));
+  app.use('/api', createIdeasRouter(ideasService));
 
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- trusted path, not user input
   if (fs.existsSync(clientDir)) {

@@ -1,10 +1,24 @@
 import { create } from 'zustand';
 
-import type { EventInput, Plan, VendorStatus } from '../../shared/types';
-import { postPlan } from '../api/client';
+import type {
+  ChatResult,
+  EventInput,
+  Idea,
+  Plan,
+  PlanPatch,
+  VendorStatus,
+} from '../../shared/types';
+import { postChat, postPlan, postRegenerateIdeas } from '../api/client';
 
 /** Generation lifecycle status. */
 export type PlanStatus = 'idle' | 'loading' | 'success' | 'error';
+
+/** A single chat message. */
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  text: string;
+  patch?: PlanPatch;
+}
 
 interface PlanState {
   plan: Plan | null;
@@ -12,6 +26,10 @@ interface PlanState {
   status: PlanStatus;
   error: string | null;
   lastInput: EventInput | null;
+  chatMessages: ChatMessage[];
+  chatLoading: boolean;
+  pendingPatch: PlanPatch | null;
+  ideasLoading: boolean;
   /** Generate a plan for the given input, updating status as it goes. */
   generate: (input: EventInput) => Promise<void>;
   /** Replace the current plan (used by later editing features). */
@@ -24,15 +42,42 @@ interface PlanState {
   toggleMilestoneDone: (id: string) => void;
   /** Cycle a vendor through to_find → contacted → booked → to_find. */
   cycleVendorStatus: (id: string) => void;
+  /** Send a chat message and receive a response. */
+  sendChat: (message: string) => Promise<void>;
+  /** Apply the pending patch to the plan. */
+  acceptPatch: () => void;
+  /** Discard the pending patch. */
+  rejectPatch: () => void;
+  /** Apply an arbitrary patch to the plan. */
+  applyPatch: (patch: PlanPatch) => void;
+  /** Replace ideas for a specific category. */
+  replaceIdeas: (category: string, newIdeas: Idea[]) => void;
+  /** Regenerate ideas for a category via the API. */
+  regenerateIdeas: (category: string) => Promise<void>;
+}
+
+function mergePatch(plan: Plan, patch: PlanPatch): Plan {
+  return {
+    ...plan,
+    ...(patch.summary !== undefined ? { summary: patch.summary } : {}),
+    ...(patch.budget !== undefined ? { budget: patch.budget } : {}),
+    ...(patch.timeline !== undefined ? { timeline: patch.timeline } : {}),
+    ...(patch.vendors !== undefined ? { vendors: patch.vendors } : {}),
+    ...(patch.ideas !== undefined ? { ideas: patch.ideas } : {}),
+  };
 }
 
 /** Global store for the active plan and its generation status. */
-export const usePlanStore = create<PlanState>((set) => ({
+export const usePlanStore = create<PlanState>((set, get) => ({
   plan: null,
   source: null,
   status: 'idle',
   error: null,
   lastInput: null,
+  chatMessages: [],
+  chatLoading: false,
+  pendingPatch: null,
+  ideasLoading: false,
   generate: async (input) => {
     set({ status: 'loading', error: null, lastInput: input });
     try {
@@ -46,7 +91,18 @@ export const usePlanStore = create<PlanState>((set) => ({
     }
   },
   setPlan: (plan) => set({ plan }),
-  reset: () => set({ plan: null, source: null, status: 'idle', error: null, lastInput: null }),
+  reset: () =>
+    set({
+      plan: null,
+      source: null,
+      status: 'idle',
+      error: null,
+      lastInput: null,
+      chatMessages: [],
+      chatLoading: false,
+      pendingPatch: null,
+      ideasLoading: false,
+    }),
   updateBudgetItem: (index, amountMinor) => {
     set((state) => {
       if (!state.plan) return {};
@@ -78,5 +134,68 @@ export const usePlanStore = create<PlanState>((set) => ({
       );
       return { plan: { ...state.plan, vendors } };
     });
+  },
+  sendChat: async (message) => {
+    const { plan } = get();
+    if (!plan) return;
+    const userMsg: ChatMessage = { role: 'user', text: message };
+    set((s) => ({ chatMessages: [...s.chatMessages, userMsg], chatLoading: true }));
+    try {
+      const result: ChatResult = await postChat(plan, message);
+      const assistantMsg: ChatMessage = {
+        role: 'assistant',
+        text: result.reply,
+        patch: result.patch,
+      };
+      set((s) => ({
+        chatMessages: [...s.chatMessages, assistantMsg],
+        chatLoading: false,
+        pendingPatch: result.patch ?? null,
+      }));
+    } catch (err) {
+      const errorMsg: ChatMessage = {
+        role: 'assistant',
+        text: err instanceof Error ? err.message : 'Something went wrong.',
+      };
+      set((s) => ({
+        chatMessages: [...s.chatMessages, errorMsg],
+        chatLoading: false,
+      }));
+    }
+  },
+  acceptPatch: () => {
+    set((state) => {
+      if (!state.plan || !state.pendingPatch) return {};
+      return { plan: mergePatch(state.plan, state.pendingPatch), pendingPatch: null };
+    });
+  },
+  rejectPatch: () => {
+    set({ pendingPatch: null });
+  },
+  applyPatch: (patch) => {
+    set((state) => {
+      if (!state.plan) return {};
+      return { plan: mergePatch(state.plan, patch) };
+    });
+  },
+  replaceIdeas: (category, newIdeas) => {
+    set((state) => {
+      if (!state.plan) return {};
+      const otherIdeas = state.plan.ideas.filter((i) => i.category !== category);
+      return { plan: { ...state.plan, ideas: [...otherIdeas, ...newIdeas] } };
+    });
+  },
+  regenerateIdeas: async (category) => {
+    const { lastInput } = get();
+    if (!lastInput) return;
+    set({ ideasLoading: true });
+    try {
+      const ideas = await postRegenerateIdeas(lastInput, category);
+      get().replaceIdeas(category, ideas);
+    } catch {
+      // Silently fail — the old ideas remain.
+    } finally {
+      set({ ideasLoading: false });
+    }
   },
 }));

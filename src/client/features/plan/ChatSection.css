@@ -1,0 +1,98 @@
+.pp-chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pp-chat__messages {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--space-1);
+  border: var(--border);
+  background: var(--bg);
+}
+
+.pp-chat__empty {
+  color: var(--muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.pp-chat__msg {
+  padding: var(--space-1);
+  border: var(--border);
+}
+
+.pp-chat__msg--user {
+  background: var(--blue);
+  color: var(--on-accent);
+  align-self: flex-end;
+  max-width: 85%;
+}
+
+.pp-chat__msg--assistant {
+  background: var(--surface);
+  align-self: flex-start;
+  max-width: 85%;
+}
+
+.pp-chat__role {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+}
+
+.pp-chat__text {
+  margin: 4px 0 0;
+}
+
+.pp-chat__typing {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.pp-chat__patch {
+  padding: var(--space-1);
+  border: 2px solid var(--orange);
+  background: var(--surface);
+}
+
+.pp-chat__patch-label {
+  margin: 0 0 var(--space-1);
+}
+
+.pp-chat__patch-actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.pp-chat__form {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-end;
+}
+
+.pp-chat__input {
+  flex: 1;
+  resize: vertical;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: var(--space-1);
+  border: var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 48px;
+}
+
+.pp-chat__input:focus {
+  outline: 3px solid var(--orange);
+  outline-offset: -1px;
+}
+
+.pp-chat__input:disabled {
+  opacity: 0.6;
+}

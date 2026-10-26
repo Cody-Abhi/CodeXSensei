@@ -1,0 +1,38 @@
+.pp-ideas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pp-ideas__group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.pp-ideas__cat {
+  margin: 0;
+  font-size: 1rem;
+  font-family: var(--font-display);
+}
+
+.pp-ideas__list {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.pp-ideas__card {
+  padding: var(--space-1);
+  border: var(--border);
+  background: var(--surface);
+}
+
+.pp-ideas__desc {
+  color: var(--muted);
+}

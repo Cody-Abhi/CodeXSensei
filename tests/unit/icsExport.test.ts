@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { gcalLink, generateICS } from '../../src/client/features/plan/icsExport';
+import { downloadICS, gcalLink, generateICS } from '../../src/client/features/plan/icsExport';
 
 describe('generateICS', () => {
   it('produces a valid VCALENDAR with VEVENT entries', () => {
@@ -49,5 +49,28 @@ describe('gcalLink', () => {
   it('encodes special characters in the title', () => {
     const url = gcalLink('Aisha & Rohan', '2099-01-01');
     expect(url).toContain('text=Aisha%20%26%20Rohan');
+  });
+});
+
+describe('downloadICS', () => {
+  it('creates and clicks an anchor element to download', () => {
+    const revokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockReturnValue(undefined);
+    const createObjectURL = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    const clickSpy = vi.fn();
+    const removeSpy = vi.fn();
+    vi.spyOn(document, 'createElement').mockReturnValue({
+      set href(_v: string) {},
+      set download(_v: string) {},
+      click: clickSpy,
+      remove: removeSpy,
+    } as unknown as HTMLAnchorElement);
+    vi.spyOn(document.body, 'appendChild').mockReturnValue(null as unknown as Node);
+
+    downloadICS('test.ics', 'BEGIN:VCALENDAR\r\nEND:VCALENDAR');
+
+    expect(createObjectURL).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
+    expect(removeSpy).toHaveBeenCalled();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:test');
   });
 });

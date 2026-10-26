@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { postPlan } from '../../src/client/api/client';
+import { postChat, postPlan, postRegenerateIdeas } from '../../src/client/api/client';
 import { buildFallbackPlan } from '../../src/shared/templates';
 import type { EventInput } from '../../src/shared/types';
 
@@ -69,5 +69,78 @@ describe('postPlan', () => {
     expect(result.source).toBe('ai');
     const init = fetchSpy.mock.calls[0]?.[1];
     expect(init?.signal).toBe(controller.signal);
+  });
+});
+
+describe('postChat', () => {
+  it('returns the parsed chat result', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({ reply: 'Sure!' }));
+    const result = await postChat(plan, 'Add vendors');
+    expect(result.reply).toBe('Sure!');
+  });
+
+  it('returns chat result with a patch', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      jsonResponse({ reply: 'Updated.', patch: { summary: 'New summary' } }),
+    );
+    const result = await postChat(plan, 'Change summary');
+    expect(result.reply).toBe('Updated.');
+    expect(result.patch?.summary).toBe('New summary');
+  });
+
+  it('throws a rate-limit message on 429', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({}, 429));
+    await expect(postChat(plan, 'Hello')).rejects.toThrow(/wait a minute/i);
+  });
+
+  it('throws a generic message on non-OK responses', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({}, 500));
+    await expect(postChat(plan, 'Hello')).rejects.toThrow(/chat failed/i);
+  });
+
+  it('throws a connection message when fetch rejects', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'));
+    await expect(postChat(plan, 'Hello')).rejects.toThrow(/could not reach the server/i);
+  });
+
+  it('throws when the response shape is unexpected', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({ bad: true }));
+    await expect(postChat(plan, 'Hello')).rejects.toThrow(/unexpected format/i);
+  });
+});
+
+describe('postRegenerateIdeas', () => {
+  const sampleIdeas = [
+    { id: 'g-1', category: 'Games', title: 'Treasure Hunt', description: 'Fun hunt' },
+    { id: 'g-2', category: 'Games', title: 'Musical Chairs', description: 'Classic game' },
+  ];
+
+  it('returns the parsed ideas', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({ ideas: sampleIdeas }));
+    const result = await postRegenerateIdeas(input, 'Games');
+    expect(result).toHaveLength(2);
+    expect(result[0]!.title).toBe('Treasure Hunt');
+  });
+
+  it('throws a rate-limit message on 429', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({}, 429));
+    await expect(postRegenerateIdeas(input, 'Games')).rejects.toThrow(/wait a minute/i);
+  });
+
+  it('throws a generic message on non-OK responses', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({}, 500));
+    await expect(postRegenerateIdeas(input, 'Games')).rejects.toThrow(/could not regenerate/i);
+  });
+
+  it('throws a connection message when fetch rejects', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline'));
+    await expect(postRegenerateIdeas(input, 'Games')).rejects.toThrow(
+      /could not reach the server/i,
+    );
+  });
+
+  it('throws when the response shape is unexpected', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({ ideas: 'bad' }));
+    await expect(postRegenerateIdeas(input, 'Games')).rejects.toThrow(/unexpected format/i);
   });
 });
