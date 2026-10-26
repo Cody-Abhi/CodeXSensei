@@ -15,6 +15,14 @@ export const SELECTORS = {
   link: ['a.badge-image', 'a[href*="/badges/"]', 'a'],
   name: ['h1.ql-display-small', 'h1'],
   avatar: ['ql-avatar.profile-avatar', 'ql-avatar', 'img.profile-avatar'],
+  /** Wrapper holding one league's badges; the heading is its previous h2 sibling. */
+  section: ['.profile-badges'],
+  heading: ['h2.ql-headline-medium', 'h2'],
+  /** "Learn more" button on a badge -> id of its dialog. */
+  modalRef: ['ql-button[modal]'],
+  /** Dialog per badge: <ql-dialog id="public-profile-award-modal-N"><p>description</p><ql-button href="/games/ID">. */
+  dialog: ['ql-dialog[id^="public-profile-award-modal"]', '[id^="public-profile-award-modal"]'],
+  dialogLink: ['ql-button[href]', 'a[href]'],
 } as const;
 
 export type SelectorKey = keyof typeof SELECTORS;

@@ -6,6 +6,9 @@ export interface PointsBreakdown {
   trivia: number;
   skills: number;
   other: number;
+  /** Points earned by game / trivia badges (may exceed the badge count when a badge states more than 1). */
+  gamePoints: number;
+  triviaPoints: number;
   total: number;
   /** Points earned from skill badges (floored). */
   skillPoints: number;
@@ -17,19 +20,27 @@ export interface PointsBreakdown {
 export function calcPoints(badges: Badge[], facilitatorBonus = 0): PointsBreakdown {
   let games = 0;
   let trivia = 0;
+  let gamePoints = 0;
+  let triviaPoints = 0;
+  const worth = (b: Badge, base: number) =>
+    POINTS.honorPointsStatedOnBadge && b.statedPoints && b.statedPoints > 0 ? b.statedPoints : base;
   let skills = 0;
   let other = 0;
   for (const b of badges) {
     if (!b.inSeason) continue;
-    if (b.type === 'GAME') games++;
-    else if (b.type === 'TRIVIA') trivia++;
-    else if (b.type === 'SKILL') skills++;
+    if (b.type === 'GAME') {
+      games++;
+      gamePoints += worth(b, POINTS.game);
+    } else if (b.type === 'TRIVIA') {
+      trivia++;
+      triviaPoints += worth(b, POINTS.trivia);
+    } else if (b.type === 'SKILL') skills++;
     else other++;
   }
   const skillPoints = Math.floor(skills / POINTS.skillBadgesPerPoint);
   const bonus = Math.max(0, facilitatorBonus);
-  const points = games * POINTS.game + trivia * POINTS.trivia + skillPoints + bonus;
-  return { games, trivia, skills, other, total: games + trivia + skills + other, skillPoints, bonus, points };
+  const points = gamePoints + triviaPoints + skillPoints + bonus;
+  return { games, trivia, skills, other, gamePoints, triviaPoints, total: games + trivia + skills + other, skillPoints, bonus, points };
 }
 
 export interface TierInfo {

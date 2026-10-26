@@ -67,6 +67,25 @@ describe('calcPoints', () => {
   });
 });
 
+describe('points stated on the badge itself', () => {
+  it('a game badge that says "2 Arcade Points" counts 2; others stay 1', () => {
+    const splash = { ...raw('The Arcade Skills Splash'), statedPoints: 2 };
+    const r = calcPoints(buildBadges([splash, raw('The Arcade Base Camp')]));
+    expect(r).toMatchObject({ games: 2, gamePoints: 3, points: 3 });
+  });
+
+  it('stated points are ignored once a badge is manually changed to a non-game type', () => {
+    const splash = { ...raw('The Arcade Skills Splash'), statedPoints: 2 };
+    const r = calcPoints(buildBadges([splash], { [splash.id]: 'OTHER' }));
+    expect(r.points).toBe(0);
+  });
+
+  it('out-of-season badges never count, stated points or not', () => {
+    const old = { ...raw('The Arcade Skills Splash', '2024-03-28T12:00:00.000Z'), statedPoints: 2 };
+    expect(calcPoints(buildBadges([old])).points).toBe(0);
+  });
+});
+
 describe('getTierInfo boundaries', () => {
   it.each([
     [0, null, 'Trooper', 50],

@@ -39,6 +39,7 @@ export const useTracker = create<TrackerState>()(
           overrides,
           facilitatorBonus: bonus,
           lastFetchedAt: payload.fetchedAt,
+          stats: payload.stats,
           snapshots: [...(existing?.snapshots ?? []), { fetchedAt: payload.fetchedAt, badgeIds, points }].slice(
             -UI.maxSnapshots,
           ),

@@ -82,6 +82,7 @@ export function toPayload(profileId: string, html: string, finalUrl: string): Pr
     avatar: parsed.avatar,
     memberSince: parsed.memberSince,
     fetchedAt: new Date().toISOString(),
+    stats: parsed.stats,
     badges: parsed.badges,
   };
 }

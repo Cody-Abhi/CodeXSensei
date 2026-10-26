@@ -1,7 +1,8 @@
 import { load } from 'cheerio';
 import { hash } from './hash';
-import { allBadgeNodes, pick, pickDoc } from './selectors';
-import type { RawBadge } from './types';
+import { POINTS } from '@/config/arcade';
+import { allBadgeNodes, pick, pickDoc, SELECTORS } from './selectors';
+import type { ProfileStats, RawBadge } from './types';
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 const EARNED = /Earned\s+([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(\d{4})/i;
@@ -29,6 +30,7 @@ export interface ParsedProfile {
   badges: RawBadge[];
   /** Badge containers found before dedupe. */
   badgeNodeCount: number;
+  stats: ProfileStats;
   /** Selector keys that needed a fallback or found nothing (logged server-side). */
   misses: string[];
 }
@@ -43,6 +45,20 @@ function absolute(href: string | undefined, base: string): string {
 }
 
 const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
+
+function statedPoints(description: string | undefined): number | undefined {
+  const m = description ? POINTS.statedPointsPattern.exec(description) : null;
+  return m ? Number(m[1]) : undefined;
+}
+
+const BADGE_ID = /\/badges\/(\d+)/;
+
+function catalogOf(href: string | undefined): 'games' | 'courses' | undefined {
+  if (!href) return undefined;
+  if (/^\/?games\/|\/games\/\d+/.test(href)) return 'games';
+  if (/course_templates\/|\/courses?\//.test(href)) return 'courses';
+  return undefined;
+}
 
 export function parseProfileHtml(html: string, baseUrl: string): ParsedProfile {
   const $ = load(html);
@@ -63,6 +79,26 @@ export function parseProfileHtml(html: string, baseUrl: string): ParsedProfile {
   if (!found) misses.push('badge');
   else if (found.selector !== '.profile-badge') misses.push(`badge(fallback:${found.selector})`);
 
+  const dialogs = new Map<string, { description: string; href?: string }>();
+  for (const selector of SELECTORS.dialog) {
+    $(selector).each((_, el) => {
+      const d = $(el);
+      const id = d.attr('id');
+      if (!id || dialogs.has(id)) return;
+      const description = clean(d.find('p').map((__, p) => $(p).text()).get().join(' '));
+      const link = pick(d, 'dialogLink', (l) => !!l.attr('href'));
+      dialogs.set(id, { description, href: link?.el.attr('href') });
+    });
+    if (dialogs.size) break;
+  }
+
+  const leagues: string[] = [];
+  $(SELECTORS.section[0]).each((_, el) => {
+    const text = clean($(el).prevAll('h2').first().text());
+    if (text && !leagues.includes(text)) leagues.push(text);
+  });
+
+  let parsedNodes = 0;
   const byTitle = new Map<string, RawBadge>();
   found?.nodes.each((_, node) => {
     const scope = $(node);
@@ -82,7 +118,25 @@ export function parseProfileHtml(html: string, baseUrl: string): ParsedProfile {
     const linkHit = pick(scope, 'link', (el) => !!el.attr('href'));
     const badgeUrl = absolute(linkHit?.el.attr('href'), baseUrl) || undefined;
 
-    const badge: RawBadge = { id: hash(`${title}|${earnedAt ?? ''}`), title, imageUrl, badgeUrl, earnedAt };
+    const modalId = pick(scope, 'modalRef')?.el.attr('modal');
+    const dialog = modalId ? dialogs.get(modalId) : undefined;
+    if (!dialog) misses.push(`modal(${title})`);
+    const league = clean(scope.closest(SELECTORS.section[0]).prevAll('h2').first().text()) || undefined;
+
+    const badge: RawBadge = {
+      id: hash(`${title}|${earnedAt ?? ''}`),
+      title,
+      imageUrl,
+      badgeUrl,
+      earnedAt,
+      description: dialog?.description || undefined,
+      learnMoreUrl: absolute(dialog?.href, baseUrl) || undefined,
+      catalog: catalogOf(dialog?.href),
+      league,
+      externalId: badgeUrl ? BADGE_ID.exec(badgeUrl)?.[1] : undefined,
+      statedPoints: statedPoints(dialog?.description),
+    };
+    parsedNodes++;
 
     // Duplicate titles (re-earned): keep the earliest date; an undated copy loses to a dated one.
     const key = title.toLowerCase();
@@ -92,12 +146,14 @@ export function parseProfileHtml(html: string, baseUrl: string): ParsedProfile {
     if (keepNew) byTitle.set(key, badge);
   });
 
+  const badges = [...byTitle.values()];
   return {
     name,
     avatar,
     memberSince,
-    badges: [...byTitle.values()],
+    badges,
     badgeNodeCount: found?.nodes.length ?? 0,
+    stats: { foundOnPage: found?.nodes.length ?? 0, duplicatesMerged: parsedNodes - badges.length, leagues },
     misses,
   };
 }

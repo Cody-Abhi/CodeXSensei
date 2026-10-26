@@ -1,6 +1,6 @@
 import { SEASON } from '@/config/arcade';
 import { format, parse } from 'date-fns';
-import { classifyTitle } from './classify';
+import { classifyBadge } from './classify';
 import type { Badge, BadgeType, RawBadge } from './types';
 
 export function isInSeason(earnedAt: string | null): boolean {
@@ -15,7 +15,7 @@ export function buildBadges(raw: RawBadge[], overrides: Record<string, BadgeType
     const override = overrides[b.id];
     return {
       ...b,
-      type: override ?? classifyTitle(b.title),
+      type: override ?? classifyBadge(b),
       overridden: !!override,
       inSeason: isInSeason(b.earnedAt),
     };

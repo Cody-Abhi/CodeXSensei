@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { classifyTitle } from '@/lib/classify';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { classifyBadge, classifyTitle } from '@/lib/classify';
+import { parseProfileHtml } from '@/lib/parseProfile';
 
 describe('classifyTitle', () => {
   it.each([
@@ -29,5 +32,36 @@ describe('classifyTitle', () => {
 
   it('trivia wins over game keywords', () => {
     expect(classifyTitle('The Arcade Trivia')).toBe('TRIVIA');
+  });
+});
+
+describe('classifyBadge uses what the profile page says about each badge', () => {
+  const html = readFileSync(path.join(__dirname, '../fixtures/profile-public.html'), 'utf8');
+  const badges = parseProfileHtml(html, 'https://www.skills.google/public_profiles/x').badges;
+  const real = (title: string) => badges.find((b) => b.title === title)!;
+
+  it('a skill badge missing from the bundled catalog is recognised from its dialog text', () => {
+    const b = { ...real('Create and Manage Bigtable Instances'), title: 'Brand New Skill Badge Not In Catalog' };
+    expect(classifyTitle(b.title)).toBe('OTHER');
+    expect(classifyBadge(b)).toBe('SKILL');
+  });
+
+  it('foundation courses that merely mention "Skill Badges" stay Other', () => {
+    const b = real('Google Cloud Computing Foundations: Data, ML, and AI in Google Cloud');
+    expect(b.description).toMatch(/Skill Badges/);
+    expect(classifyBadge({ ...b, title: 'Unlisted Foundations Course' })).toBe('OTHER');
+  });
+
+  it('the /games catalog marks a game badge even when its title has no game keyword', () => {
+    expect(classifyBadge({ title: 'Totally Novel Name', catalog: 'games' })).toBe('GAME');
+  });
+
+  it('a course-catalog badge is never a game, but trivia wording still wins', () => {
+    expect(classifyBadge({ title: 'Level 9 Something', catalog: 'courses' })).toBe('OTHER');
+    expect(classifyBadge({ title: 'Qwiklabs Trivia October 2023 Week 1', catalog: 'courses' })).toBe('TRIVIA');
+  });
+
+  it('facilitator badges in the /games catalog are not games', () => {
+    expect(classifyBadge(real('Google Cloud Arcade Facilitator Program 2024'))).toBe('OTHER');
   });
 });

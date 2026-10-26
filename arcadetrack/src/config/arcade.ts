@@ -13,6 +13,12 @@ export const POINTS = {
   trivia: 1,
   /** Skill badges needed for 1 point (total is floored). */
   skillBadgesPerPoint: 2,
+  /**
+   * Some badges state their own value in the profile dialog ("...and 2 Arcade Points!").
+   * When true, a Game/Trivia badge counts that many points instead of the default above.
+   */
+  honorPointsStatedOnBadge: true,
+  statedPointsPattern: /\b(\d{1,2})\s+arcade\s+points?\b/i,
 } as const;
 
 export interface Tier {
@@ -20,24 +26,32 @@ export interface Tier {
   name: string;
   min: number;
   colorVar: string;
+  /** Prize cap per tier (waterfall: overflow rolls down to the next tier). Informational only. */
+  seats: number;
 }
 
 /** Ascending by `min`. A tier runs until the next tier's `min` - 1; the last is open-ended. */
 export const TIERS: readonly Tier[] = [
-  { id: 'trooper', name: 'Trooper', min: 50, colorVar: '--tier-trooper' },
-  { id: 'ranger', name: 'Ranger', min: 75, colorVar: '--tier-ranger' },
-  { id: 'champion', name: 'Champion', min: 95, colorVar: '--tier-champion' },
-  { id: 'legend', name: 'Legend', min: 120, colorVar: '--tier-legend' },
+  { id: 'trooper', name: 'Trooper', min: 50, colorVar: '--tier-trooper', seats: 6000 },
+  { id: 'ranger', name: 'Ranger', min: 75, colorVar: '--tier-ranger', seats: 4000 },
+  { id: 'champion', name: 'Champion', min: 95, colorVar: '--tier-champion', seats: 3000 },
+  { id: 'legend', name: 'Legend', min: 120, colorVar: '--tier-legend', seats: 2500 },
 ];
 
 export const TIER_NOTE =
-  'Tiers have limited seats on a first-come basis (waterfall system). This app shows eligibility only, not seat availability.';
+  'Prizes are first-come, first-served with caps per tier (Legend 2,500 · Champion 3,000 · Ranger 4,000 · Trooper 6,000). When a tier fills, eligibility rolls down to the next tier (waterfall). This app shows eligibility only, not seat availability; check the live counter on the official Arcade page.';
 
 export const CLASSIFY = {
   trivia: /trivia/i,
   /** Checked after trivia, before game: facilitator badges are not game badges. */
   neverGame: /facilitator/i,
   game: /arcade|base camp|level\s*\d|skills boost arcade|certification zone|\bgames?\b/i,
+  /**
+   * Course-catalog badges whose dialog text says they are a (singular) skill badge, e.g.
+   * "Earn a skill badge by completing ..." / "Complete the introductory X skill badge to demonstrate".
+   * Plural "Skill Badges" is excluded: foundation courses merely point learners at them.
+   */
+  skillDescription: /\b(?:earn|complete)\b[^.]{0,120}\bskill badge(?!s)\b/i,
 } as const;
 
 export const TYPE_META: Record<BadgeType, { label: string; colorVar: string }> = {

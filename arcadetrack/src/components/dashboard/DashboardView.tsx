@@ -135,6 +135,14 @@ export function DashboardView() {
         <h2 id="badges-h" className="text-2xl uppercase">
           Badges
         </h2>
+        {profile.stats && (
+          <p className="font-mono text-xs" data-testid="scrape-stats">
+            Read {profile.stats.foundOnPage} badge{profile.stats.foundOnPage === 1 ? '' : 's'} from the public profile page
+            {profile.stats.duplicatesMerged > 0 && ` · ${profile.stats.duplicatesMerged} duplicate title${profile.stats.duplicatesMerged === 1 ? '' : 's'} merged`}
+            {profile.stats.leagues.length > 0 && ` · ${profile.stats.leagues.join(', ')}`}
+            {` · ${badges.length} tracked`}
+          </p>
+        )}
         {badges.length === 0 ? (
           <Card className="space-y-3">
             <p className="text-lg font-bold">No badges on this profile yet.</p>

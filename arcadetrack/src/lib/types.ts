@@ -17,6 +17,27 @@ export interface RawBadge {
   badgeUrl?: string;
   /** ISO timestamp, or null when the date text could not be parsed. */
   earnedAt: string | null;
+  /** Text of the badge's "Learn more" dialog on the profile page. */
+  description?: string;
+  /** Official "Learn more" page (absolute URL) from the dialog. */
+  learnMoreUrl?: string;
+  /** Which Google catalog the badge links to: /games/<id> or /course_templates/<id>. */
+  catalog?: 'games' | 'courses';
+  /** Section heading the badge was listed under (e.g. "Bronze League"). */
+  league?: string;
+  /** Google's own badge id from /badges/<id>. */
+  externalId?: string;
+  /** Points the badge says it is worth in its own dialog text, e.g. 2 for "...and 2 Arcade Points!". */
+  statedPoints?: number;
+}
+
+export interface ProfileStats {
+  /** .profile-badge containers present on the page. */
+  foundOnPage: number;
+  /** Same-title badges collapsed into one (earliest date kept). */
+  duplicatesMerged: number;
+  /** Section headings found, in page order. */
+  leagues: string[];
 }
 
 export interface Badge extends RawBadge {
@@ -31,6 +52,7 @@ export interface ProfilePayload {
   avatar: string;
   memberSince: string | null;
   fetchedAt: string;
+  stats: ProfileStats;
   badges: RawBadge[];
 }
 
@@ -51,6 +73,7 @@ export interface TrackedProfile {
   overrides: Record<string, BadgeType>;
   facilitatorBonus: number;
   lastFetchedAt: string;
+  stats?: ProfileStats;
   /** Badge ids that were not in the previous snapshot (shown with NEW! stickers). */
   newBadgeIds: string[];
 }

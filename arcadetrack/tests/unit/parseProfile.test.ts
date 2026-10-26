@@ -34,6 +34,7 @@ describe('parseProfileHtml (real profile fixture)', () => {
 
   it('extracts every badge container with title, image, link and date', () => {
     expect(parsed.badgeNodeCount).toBe(81);
+    expect(parsed.stats).toEqual({ foundOnPage: 81, duplicatesMerged: 0, leagues: ['Bronze League'] });
     expect(parsed.badges.length).toBe(81);
     for (const b of parsed.badges) {
       expect(b.title.length).toBeGreaterThan(0);
@@ -42,6 +43,25 @@ describe('parseProfileHtml (real profile fixture)', () => {
       expect(b.earnedAt).toMatch(/^\d{4}-\d{2}-\d{2}T12:00:00\.000Z$/);
     }
     expect(parsed.misses).toEqual([]);
+  });
+
+  it('reads every badge dialog: description, official link, catalog, league, Google badge id', () => {
+    for (const b of parsed.badges) {
+      expect(b.description?.length).toBeGreaterThan(20);
+      expect(b.learnMoreUrl).toMatch(/^https:\/\/www\.skills\.google\/(games|course_templates)\/\d+$/);
+      expect(b.catalog).toBe(b.learnMoreUrl!.includes('/games/') ? 'games' : 'courses');
+      expect(b.league).toBe('Bronze League');
+      expect(b.externalId).toMatch(/^\d+$/);
+    }
+    expect(parsed.badges.filter((b) => b.catalog === 'games')).toHaveLength(43);
+    expect(parsed.badges.filter((b) => b.catalog === 'courses')).toHaveLength(38);
+    const speedrun = parsed.badges.find((b) => b.title === 'The Arcade June Speedrun');
+    expect(speedrun?.description).toContain('Race to the finish line');
+  });
+
+  it('reads points a badge states about itself (only Skills Splash says "2 Arcade Points")', () => {
+    const stated = parsed.badges.filter((b) => b.statedPoints !== undefined);
+    expect(stated.map((b) => [b.title, b.statedPoints])).toEqual([['The Arcade Skills Splash', 2]]);
   });
 
   it('parses a known badge exactly', () => {

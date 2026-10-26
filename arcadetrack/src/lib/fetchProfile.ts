@@ -7,6 +7,7 @@ const payloadSchema = z.object({
   avatar: z.string(),
   memberSince: z.string().nullable(),
   fetchedAt: z.string(),
+  stats: z.object({ foundOnPage: z.number(), duplicatesMerged: z.number(), leagues: z.array(z.string()) }),
   badges: z.array(
     z.object({
       id: z.string(),
@@ -14,6 +15,12 @@ const payloadSchema = z.object({
       imageUrl: z.string(),
       badgeUrl: z.string().optional(),
       earnedAt: z.string().nullable(),
+      description: z.string().optional(),
+      learnMoreUrl: z.string().optional(),
+      catalog: z.enum(['games', 'courses']).optional(),
+      league: z.string().optional(),
+      externalId: z.string().optional(),
+      statedPoints: z.number().optional(),
     }),
   ),
 });

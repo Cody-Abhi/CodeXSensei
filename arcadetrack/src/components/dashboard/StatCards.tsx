@@ -4,8 +4,8 @@ import { skillPairingHint, type PointsBreakdown } from '@/lib/points';
 
 export function StatCards({ b, lifetimeTotal }: { b: PointsBreakdown; lifetimeTotal: number }) {
   const stats = [
-    { label: 'Games', value: b.games, colorVar: TYPE_META.GAME.colorVar },
-    { label: 'Trivia', value: b.trivia, colorVar: TYPE_META.TRIVIA.colorVar },
+    { label: 'Games', value: b.games, pts: b.gamePoints, colorVar: TYPE_META.GAME.colorVar },
+    { label: 'Trivia', value: b.trivia, pts: b.triviaPoints, colorVar: TYPE_META.TRIVIA.colorVar },
     { label: 'Skill Badges', value: b.skills, colorVar: TYPE_META.SKILL.colorVar },
     { label: 'Other', value: b.other, colorVar: TYPE_META.OTHER.colorVar },
     { label: 'Total badges', value: b.total, colorVar: '--yellow' },
@@ -22,6 +22,7 @@ export function StatCards({ b, lifetimeTotal }: { b: PointsBreakdown; lifetimeTo
           >
             <p className="text-xs font-bold uppercase">{s.label}</p>
             <p className="font-mono text-4xl font-bold">{s.value}</p>
+            {s.pts !== undefined && s.pts !== s.value && <p className="font-mono text-xs font-bold">{s.pts} pts</p>}
           </Card>
         ))}
       </div>

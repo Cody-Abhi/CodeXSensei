@@ -38,10 +38,28 @@ export function BadgeGrid({ badges, newIds, onOverride }: Props) {
             <div className="flex flex-wrap items-center gap-2">
               <Chip colorVar={TYPE_META[b.type].colorVar}>{TYPE_META[b.type].label}</Chip>
               {b.overridden && <Chip colorVar="--yellow">Edited</Chip>}
+              {b.statedPoints && b.statedPoints > 1 && (b.type === 'GAME' || b.type === 'TRIVIA') && (
+                <Chip colorVar="--green">{b.statedPoints} pts</Chip>
+              )}
               {!b.earnedAt && <Chip colorVar="--orange">Date unknown</Chip>}
               {b.earnedAt && !b.inSeason && <Chip>Lifetime</Chip>}
             </div>
             <p className="font-mono text-sm">{b.earnedAt ? formatDay(b.earnedAt) : '—'}</p>
+            {(b.description || b.learnMoreUrl) && (
+              <details className="border-2 border-ink bg-bg px-2 py-1 text-sm">
+                <summary className="cursor-pointer font-bold uppercase">About</summary>
+                {b.description && <p className="mt-1">{b.description}</p>}
+                <p className="mt-1 font-mono text-xs">
+                  {b.league && <span>{b.league}</span>}
+                  {b.catalog && <span>{b.league ? ' · ' : ''}{b.catalog === 'games' ? 'Arcade / game catalog' : 'Course catalog'}</span>}
+                </p>
+                {b.learnMoreUrl && (
+                  <a href={b.learnMoreUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block font-bold underline">
+                    Official page ↗
+                  </a>
+                )}
+              </details>
+            )}
             <label className="mt-auto block text-xs font-bold uppercase">
               Type
               <select
