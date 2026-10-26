@@ -1,0 +1,120 @@
+.pp-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pp-timeline__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.pp-timeline__progress {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.pp-timeline__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.pp-timeline__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: var(--border);
+  background: var(--surface);
+}
+
+.pp-timeline__item.is-done {
+  opacity: 0.7;
+}
+
+.pp-timeline__item.is-overdue {
+  border-color: var(--red);
+}
+
+.pp-timeline__check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pp-timeline__check input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.pp-timeline__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: var(--border);
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--surface);
+}
+
+.pp-timeline__item.is-done .pp-timeline__icon {
+  background: var(--green);
+  color: var(--on-accent);
+}
+
+.pp-timeline__item.is-overdue .pp-timeline__icon {
+  background: var(--red);
+  color: var(--on-accent);
+}
+
+.pp-timeline__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pp-timeline__title {
+  display: block;
+}
+
+.pp-timeline__item.is-done .pp-timeline__title {
+  text-decoration: line-through;
+}
+
+.pp-timeline__meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.pp-timeline__overdue {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.pp-timeline__gcal {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 2px 6px;
+  border: 1px solid var(--ink);
+  background: var(--blue);
+}
+
+.pp-timeline__gcal:hover {
+  background: var(--ink);
+  color: var(--surface);
+}

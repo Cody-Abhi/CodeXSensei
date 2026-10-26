@@ -1,11 +1,12 @@
 import { Link, Navigate } from 'react-router-dom';
 
 import { Badge } from '../../components/Badge';
-import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import type { Currency } from '../../../shared/types';
 import { usePlanStore } from '../../store/planStore';
-import { PlanOverview } from './PlanOverview';
+import { BudgetSection } from './BudgetSection';
+import { TimelineSection } from './TimelineSection';
+import { VendorSection } from './VendorSection';
 import './PlanPage.css';
 
 /** Loading skeletons shown while a plan is generated. */
@@ -21,9 +22,9 @@ function Skeletons(): React.JSX.Element {
 }
 
 /**
- * Plan dashboard (Phase 5 overview; enriched with tabs in Phase 6). Announces
- * results via an `aria-live` region and shows skeletons with `aria-busy` while
- * loading (PRD §F2).
+ * Plan dashboard with interactive budget, timeline, and vendor sections
+ * (PRD §F2–F5). Announces results via `aria-live` and shows skeletons with
+ * `aria-busy` while loading.
  *
  * @returns The plan page.
  */
@@ -44,8 +45,8 @@ export function PlanPage(): React.JSX.Element {
     <div className="pp-plan">
       <div className="pp-plan__head">
         <h1>Your plan</h1>
-        <Link to="/plan/new" className="pp-plan__edit">
-          <Button variant="outline">Start over</Button>
+        <Link to="/plan/new" className="pp-plan__edit pp-btn pp-btn--outline">
+          Start over
         </Link>
       </div>
 
@@ -55,21 +56,44 @@ export function PlanPage(): React.JSX.Element {
         {status === 'error' && (
           <Card title="We hit a snag" headerTone="red">
             <p role="alert">{error}</p>
-            <Link to="/plan/new">
-              <Button tone="blue">Try again</Button>
+            <Link to="/plan/new" className="pp-btn tone-blue">
+              Try again
             </Link>
           </Card>
         )}
 
         {status === 'success' && plan && (
-          <>
+          <div className="pp-plan__sections">
             <p className="pp-plan__source">
               <Badge tone={source === 'fallback' ? 'orange' : 'green'} icon="✨">
                 {source === 'fallback' ? 'Smart template' : 'AI-generated'}
               </Badge>
             </p>
-            <PlanOverview plan={plan} currency={currency} />
-          </>
+            <Card title="Summary" headerTone="yellow">
+              <p>{plan.summary}</p>
+            </Card>
+            <BudgetSection
+              budget={plan.budget}
+              currency={currency}
+              plannedBudgetMinor={lastInput?.budgetMinor ?? 0}
+            />
+            <TimelineSection timeline={plan.timeline} eventName={lastInput?.name ?? 'Event'} />
+            <VendorSection
+              vendors={plan.vendors}
+              currency={currency}
+              city={lastInput?.city ?? ''}
+            />
+            <Card title="Ideas" headerTone="purple">
+              <ul className="pp-plan__ideas">
+                {plan.ideas.map((idea) => (
+                  <li key={idea.id}>
+                    <strong>{idea.title}</strong>
+                    <span className="pp-plan__muted"> — {idea.description}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
         )}
       </div>
     </div>

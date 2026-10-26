@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { EventInput, Plan } from '../../shared/types';
+import type { EventInput, Plan, VendorStatus } from '../../shared/types';
 import { postPlan } from '../api/client';
 
 /** Generation lifecycle status. */
@@ -18,6 +18,12 @@ interface PlanState {
   setPlan: (plan: Plan) => void;
   /** Clear everything back to idle. */
   reset: () => void;
+  /** Update a single budget item's amount. */
+  updateBudgetItem: (index: number, amountMinor: number) => void;
+  /** Toggle a milestone's done state. */
+  toggleMilestoneDone: (id: string) => void;
+  /** Cycle a vendor through to_find → contacted → booked → to_find. */
+  cycleVendorStatus: (id: string) => void;
 }
 
 /** Global store for the active plan and its generation status. */
@@ -41,4 +47,36 @@ export const usePlanStore = create<PlanState>((set) => ({
   },
   setPlan: (plan) => set({ plan }),
   reset: () => set({ plan: null, source: null, status: 'idle', error: null, lastInput: null }),
+  updateBudgetItem: (index, amountMinor) => {
+    set((state) => {
+      if (!state.plan) return {};
+      const budget = state.plan.budget.map((item, i) =>
+        i === index ? { ...item, amountMinor } : item,
+      );
+      return { plan: { ...state.plan, budget } };
+    });
+  },
+  toggleMilestoneDone: (id) => {
+    set((state) => {
+      if (!state.plan) return {};
+      const timeline = state.plan.timeline.map((item) =>
+        item.id === id ? { ...item, done: !item.done } : item,
+      );
+      return { plan: { ...state.plan, timeline } };
+    });
+  },
+  cycleVendorStatus: (id) => {
+    const NEXT: Record<VendorStatus, VendorStatus> = {
+      to_find: 'contacted',
+      contacted: 'booked',
+      booked: 'to_find',
+    };
+    set((state) => {
+      if (!state.plan) return {};
+      const vendors = state.plan.vendors.map((v) =>
+        v.id === id ? { ...v, status: NEXT[v.status] } : v,
+      );
+      return { plan: { ...state.plan, vendors } };
+    });
+  },
 }));

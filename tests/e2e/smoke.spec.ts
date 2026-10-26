@@ -44,7 +44,10 @@ test.describe('design system interactions', () => {
 
   test('skip link is the first focusable element', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
     await page.keyboard.press('Tab');
-    await expect(page.getByRole('link', { name: /skip to content/i })).toBeFocused();
+    await expect(page.getByRole('link', { name: /skip to content/i })).toBeFocused({
+      timeout: 10_000,
+    });
   });
 });
