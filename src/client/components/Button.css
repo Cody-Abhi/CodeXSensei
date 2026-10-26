@@ -1,5 +1,4 @@
 .pp-btn {
-  --fill: var(--yellow);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -12,10 +11,11 @@
   font-size: 1rem;
   line-height: 1;
   color: var(--on-accent);
-  background: var(--fill);
+  background: var(--fill, var(--yellow));
   border: var(--border);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
+  text-decoration: none;
   transition:
     transform var(--motion-fast) var(--ease),
     box-shadow var(--motion-fast) var(--ease);

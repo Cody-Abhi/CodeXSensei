@@ -1,5 +1,7 @@
 import type { z } from 'zod';
 
+export type { Currency } from './money';
+
 import type {
   BudgetItemSchema,
   ChatRequestSchema,

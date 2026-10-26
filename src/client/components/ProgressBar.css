@@ -19,9 +19,8 @@
 }
 
 .pp-progress__fill {
-  --fill: var(--green);
   height: 100%;
-  background-color: var(--fill);
+  background-color: var(--fill, var(--green));
   background-image: repeating-linear-gradient(
     45deg,
     rgba(17, 17, 17, 0.18) 0,

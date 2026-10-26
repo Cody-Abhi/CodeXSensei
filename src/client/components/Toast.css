@@ -1,5 +1,4 @@
 .pp-toast {
-  --fill: var(--green);
   position: fixed;
   left: 50%;
   bottom: var(--space-3);
@@ -11,7 +10,7 @@
   max-width: min(92vw, 420px);
   padding: var(--space-1) var(--space-2);
   color: var(--on-accent);
-  background: var(--fill);
+  background: var(--fill, var(--green));
   border: var(--border);
   box-shadow: var(--shadow);
   font-weight: 600;

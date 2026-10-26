@@ -37,6 +37,11 @@ export function Home(): React.JSX.Element {
           </li>
         ))}
       </ul>
+      <p className="pp-home__cta">
+        <Link to="/plan/new" className="pp-btn pp-btn--solid pp-btn--lg tone-green">
+          Start planning →
+        </Link>
+      </p>
       <p>
         Explore the building blocks in the <Link to="/style-guide">style guide</Link>.
       </p>
