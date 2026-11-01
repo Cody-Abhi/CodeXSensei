@@ -76,6 +76,32 @@
   --cp-shadow-2: 0 4px 12px rgba(23, 43, 54, 0.06), 0 2px 4px rgba(23, 43, 54, 0.04);
   --cp-shadow-3: 0 16px 40px rgba(23, 43, 54, 0.1), 0 4px 10px rgba(23, 43, 54, 0.05);
 
+  /* Auth dark context — used by login/register pages on the dark hero */
+  --cp-auth-bg: #06283D;
+  --cp-auth-bg-deep: #041824;
+  --cp-auth-bg-mid: #073B50;
+  --cp-auth-accent: #20DCCB;
+  --cp-auth-card-bg: rgba(255, 255, 255, 0.95);
+  --cp-auth-card-border: rgba(255, 255, 255, 0.3);
+  --cp-auth-card-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --cp-auth-text-white: #FFFFFF;
+  --cp-auth-text-white-70: rgba(255, 255, 255, 0.7);
+  --cp-auth-text-white-60: rgba(255, 255, 255, 0.6);
+  --cp-auth-text-white-50: rgba(255, 255, 255, 0.5);
+  --cp-auth-text-slate: #64748B;
+  --cp-auth-text-slate-light: #94A3B8;
+  --cp-auth-input-bg: #F8FAFC;
+  --cp-auth-input-border: #E2E8F0;
+  --cp-auth-divider: #E2E8F0;
+  --cp-auth-badge-bg: #E6F7F5;
+  --cp-auth-error-bg: #FEF2F2;
+  --cp-auth-tabs-bg: #F1F5F9;
+  --cp-auth-notif-bg: #EF4444;
+
+  /* Sidebar dark */
+  --cp-sidebar-bg: #06283D;
+  --cp-sidebar-active: #0F766E;
+
   /* Motion */
   --cp-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --cp-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);

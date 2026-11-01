@@ -5,7 +5,7 @@ import { Button, type ButtonProps } from "./button";
 
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
   icon: LucideIcon;
-  size?: 16 | 20 | 24;
+  size?: number;
   /** Provide a label to make the icon meaningful to assistive tech. */
   label?: string;
 }
@@ -30,7 +30,7 @@ export interface IconButtonProps extends Omit<ButtonProps, "children"> {
   icon: LucideIcon;
   /** Required: icon-only buttons must have an accessible name (§15.5). */
   "aria-label": string;
-  iconSize?: 16 | 20 | 24;
+  iconSize?: number;
 }
 
 /** Square icon-only button; `aria-label` is required by the type. */

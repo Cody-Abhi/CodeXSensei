@@ -106,6 +106,65 @@
   }
 }
 
+/* Auth dark context — uses --cp-auth-* tokens for the login overlay. */
+@layer components {
+  .auth-card {
+    background-color: var(--cp-auth-card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--cp-auth-card-border);
+    box-shadow: var(--cp-auth-card-shadow);
+  }
+  .auth-input {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--cp-auth-input-border);
+    background-color: var(--cp-auth-input-bg);
+    font-size: 0.9375rem;
+    color: var(--cp-text);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .auth-input::placeholder {
+    color: var(--cp-auth-text-slate-light);
+  }
+  .auth-input:focus {
+    border-color: var(--cp-primary);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+  }
+  .auth-input-icon { color: var(--cp-auth-text-slate-light); }
+  .auth-text-white-70 { color: var(--cp-auth-text-white-70); }
+  .auth-text-slate { color: var(--cp-auth-text-slate); }
+  .auth-text-slate-light { color: var(--cp-auth-text-slate-light); }
+  .auth-tabs-bg { background-color: var(--cp-auth-tabs-bg); }
+  .auth-secure-badge {
+    background-color: var(--cp-auth-badge-bg);
+    color: var(--cp-primary);
+  }
+  .auth-badge-circle { background-color: var(--cp-auth-badge-bg); }
+  .auth-error-box {
+    background-color: var(--cp-auth-error-bg);
+    color: var(--cp-danger);
+  }
+  .auth-divider { background-color: var(--cp-auth-divider); }
+  .auth-social-btn {
+    border-color: var(--cp-auth-divider);
+    color: var(--cp-text-secondary);
+  }
+  .auth-social-btn:hover { background-color: var(--cp-auth-input-bg); }
+  .auth-checkbox { accent-color: var(--cp-primary); }
+  .auth-page-root { background-color: var(--cp-auth-bg); }
+  .auth-page-glow {
+    background:
+      radial-gradient(ellipse at 70% 50%, rgba(15,118,110,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 30% 80%, rgba(32,220,203,0.08) 0%, transparent 50%);
+  }
+  .auth-hero-heading { color: var(--cp-auth-text-white); }
+  .auth-hero-accent { color: var(--cp-auth-accent); }
+}
+
 /* Restrained glassmorphism — ONLY for floating map controls, overlays and
    selected nav elements (never full-site). Falls back to a solid surface where
    backdrop-filter is unsupported. */
@@ -122,6 +181,52 @@
       backdrop-filter: blur(var(--cp-glass-blur)) saturate(140%);
     }
   }
+}
+
+/* Shimmer skeleton animation — dark variant for navy surfaces */
+@layer components {
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 40%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 60%,
+      transparent 100%
+    );
+    animation: shimmer 2s infinite ease-in-out;
+  }
+  .skeleton-shimmer-light {
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+  .skeleton-shimmer-light::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.03) 40%,
+      rgba(0, 0, 0, 0.06) 50%,
+      rgba(0, 0, 0, 0.03) 60%,
+      transparent 100%
+    );
+    animation: shimmer 2s infinite ease-in-out;
+  }
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* Respect reduced-motion globally (§15.6). */
