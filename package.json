@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:rules": "vitest run --config vitest.rules.config.ts",
+    "test:rules": "vitest run --config vitest.rules.config.mts",
     "test:e2e": "playwright test",
     "emulators": "firebase emulators:start",
     "verify:contrast": "tsx scripts/verify-contrast.ts",
