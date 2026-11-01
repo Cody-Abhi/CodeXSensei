@@ -2,18 +2,46 @@ name: CI
 
 on:
   push:
-    branches: [ main, "claude/**" ]
+    branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check:
+  verify:
+    name: Typecheck · Lint · Test · Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - name: Validate dataset
-        run: node scripts/validate-data.js
-      - name: Run tests
-        run: node --test
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit & domain tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+        env:
+          # Build must succeed without runtime secrets; env is validated lazily.
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NEXT_PUBLIC_CITY_ID: blr
+          NEXT_PUBLIC_CITY_NAME: Bengaluru
+          NEXT_PUBLIC_DEMO_MODE: "true"

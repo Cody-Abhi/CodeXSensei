@@ -1,7 +1,0 @@
-# DawaDekho
-> Free, open-source web app that shows the Jan Aushadhi (PMBJP) generic medicine with the same salt and strength as a branded Indian medicine, and the price difference.
-
-- Data: official Jan Aushadhi product list (PMBI), snapshot dated in README.
-- AI: Gemma 4 reads printed medicine strips only. It never generates drug information.
-- Not medical advice. Users are told to confirm with a doctor or pharmacist.
-- Source code: https://github.com/cody-abhi/codexsensei (MIT)

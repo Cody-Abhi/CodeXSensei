@@ -1,7 +1,0 @@
-{
-  "name": "read-strip",
-  "version": "1.0.0",
-  "description": "Gemma 4 strip reader for DawaDekho. Reads printed medicine strips, returns strict JSON. No runtime dependencies (Node 18 global fetch).",
-  "main": "index.js",
-  "license": "MIT"
-}

@@ -1,0 +1,119 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* Map the "Survey Ledger" semantic tokens to Tailwind v4 utilities.
+   `inline` makes utilities resolve directly to the --cp-* custom properties,
+   so themes can be swapped at runtime without rebuilding. Components reference
+   these utilities (bg-surface, text-muted, …) and never raw hex (§44). */
+@theme inline {
+  /* Brand */
+  --color-primary: var(--cp-primary);
+  --color-primary-hover: var(--cp-primary-hover);
+  --color-primary-subtle: var(--cp-primary-subtle);
+  --color-on-primary: var(--cp-on-primary);
+  --color-secondary: var(--cp-secondary);
+  --color-secondary-subtle: var(--cp-secondary-subtle);
+  --color-accent: var(--cp-accent);
+
+  /* Surfaces */
+  --color-canvas: var(--cp-bg);
+  --color-surface: var(--cp-surface);
+  --color-sunken: var(--cp-surface-sunken);
+
+  /* Text */
+  --color-ink: var(--cp-text);
+  --color-ink-secondary: var(--cp-text-secondary);
+  --color-muted: var(--cp-text-muted);
+
+  /* Borders */
+  --color-border: var(--cp-border);
+  --color-border-strong: var(--cp-border-strong);
+
+  /* Status */
+  --color-success: var(--cp-success);
+  --color-success-bg: var(--cp-success-bg);
+  --color-warning: var(--cp-warning);
+  --color-warning-bg: var(--cp-warning-bg);
+  --color-danger: var(--cp-danger);
+  --color-danger-bg: var(--cp-danger-bg);
+  --color-info: var(--cp-info);
+  --color-info-bg: var(--cp-info-bg);
+
+  /* Priority */
+  --color-prio-critical-fg: var(--cp-prio-critical-fg);
+  --color-prio-critical-bg: var(--cp-prio-critical-bg);
+  --color-prio-critical-solid: var(--cp-prio-critical-solid);
+  --color-prio-high-fg: var(--cp-prio-high-fg);
+  --color-prio-high-bg: var(--cp-prio-high-bg);
+  --color-prio-high-solid: var(--cp-prio-high-solid);
+  --color-prio-medium-fg: var(--cp-prio-medium-fg);
+  --color-prio-medium-bg: var(--cp-prio-medium-bg);
+  --color-prio-medium-solid: var(--cp-prio-medium-solid);
+  --color-prio-low-fg: var(--cp-prio-low-fg);
+  --color-prio-low-bg: var(--cp-prio-low-bg);
+  --color-prio-low-solid: var(--cp-prio-low-solid);
+
+  /* AI + demo */
+  --color-ai-bg: var(--cp-ai-bg);
+  --color-ai-border: var(--cp-ai-border);
+  --color-demo-bg: var(--cp-demo-bg);
+  --color-demo-fg: var(--cp-demo-fg);
+
+  /* Radii */
+  --radius-xs: var(--cp-radius-xs);
+  --radius-sm: var(--cp-radius-sm);
+  --radius-md: var(--cp-radius-md);
+  --radius-lg: var(--cp-radius-lg);
+  --radius-full: var(--cp-radius-full);
+
+  /* Shadows */
+  --shadow-e1: var(--cp-shadow-1);
+  --shadow-e2: var(--cp-shadow-2);
+  --shadow-e3: var(--cp-shadow-3);
+
+  /* Typography — font CSS variables are injected by next/font in layout.tsx */
+  --font-sans: var(--font-public-sans), "Noto Sans", system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--cp-bg);
+    color: var(--cp-text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.625;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Single, consistent focus treatment (§15.1 — marigold fails 3:1, so primary). */
+  :focus-visible {
+    outline: 2px solid var(--cp-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Numeric alignment for scores, metrics, tables. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Respect reduced-motion globally (§15.6). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

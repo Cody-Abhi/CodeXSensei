@@ -1,0 +1,87 @@
+/* CivicPulse "Survey Ledger" design tokens — PRD §15.1 / §15.3.
+   Semantic CSS variables only. Dark theme (P2) can be added later via
+   [data-theme="dark"] without touching components. */
+:root {
+  /* Brand */
+  --cp-primary: #1b3a8c;
+  --cp-primary-hover: #142d70;
+  --cp-primary-subtle: #e8edf8;
+  --cp-on-primary: #ffffff;
+  --cp-secondary: #0b6e66;
+  --cp-secondary-subtle: #e3f2f0;
+  --cp-accent: #f2b233;
+
+  /* Surfaces */
+  --cp-bg: #f4f6f9;
+  --cp-surface: #ffffff;
+  --cp-surface-elevated: #ffffff;
+  --cp-surface-sunken: #edf0f5;
+
+  /* Text */
+  --cp-text: #13203a;
+  --cp-text-secondary: #3a4762;
+  --cp-text-muted: #5e6a84;
+
+  /* Borders */
+  --cp-border: #d9dfea;
+  --cp-border-strong: #76829a;
+
+  /* Status */
+  --cp-success: #17683f;
+  --cp-success-bg: #e6f4ec;
+  --cp-warning: #7a5208;
+  --cp-warning-bg: #fbf1db;
+  --cp-danger: #9b2318;
+  --cp-danger-bg: #fceae8;
+  --cp-info: #1d4ed8;
+  --cp-info-bg: #e8effd;
+
+  /* Priority */
+  --cp-prio-critical-fg: #8f1d14;
+  --cp-prio-critical-bg: #fce9e7;
+  --cp-prio-critical-solid: #b42318;
+  --cp-prio-high-fg: #8a3a07;
+  --cp-prio-high-bg: #fdeee3;
+  --cp-prio-high-solid: #d9480f;
+  --cp-prio-medium-fg: #6e4a07;
+  --cp-prio-medium-bg: #fbf3dc;
+  --cp-prio-medium-solid: #c98a12;
+  --cp-prio-low-fg: #2f4a6b;
+  --cp-prio-low-bg: #e9eff6;
+  --cp-prio-low-solid: #5b7390;
+
+  /* AI + demo */
+  --cp-ai-bg: #f1effb;
+  --cp-ai-border: #c9c2ee;
+  --cp-demo-bg: #eef1f4;
+  --cp-demo-fg: #3a4762;
+
+  /* Radii */
+  --cp-radius-xs: 4px;
+  --cp-radius-sm: 6px;
+  --cp-radius-md: 10px;
+  --cp-radius-lg: 14px;
+  --cp-radius-full: 9999px;
+
+  /* Shadows */
+  --cp-shadow-1: 0 1px 2px rgba(19, 32, 58, 0.06), 0 1px 1px rgba(19, 32, 58, 0.04);
+  --cp-shadow-2: 0 4px 12px rgba(19, 32, 58, 0.08), 0 2px 4px rgba(19, 32, 58, 0.05);
+  --cp-shadow-3: 0 16px 40px rgba(19, 32, 58, 0.14), 0 4px 10px rgba(19, 32, 58, 0.06);
+
+  /* Motion */
+  --cp-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --cp-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --cp-dur-fast: 120ms;
+  --cp-dur-base: 180ms;
+  --cp-dur-slow: 260ms;
+
+  /* Z-index scale (§15.3) */
+  --cp-z-sticky: 10;
+  --cp-z-sidebar: 20;
+  --cp-z-dropdown: 30;
+  --cp-z-overlay: 40;
+  --cp-z-dialog: 50;
+  --cp-z-toast: 60;
+  --cp-z-tooltip: 70;
+  --cp-z-skiplink: 80;
+}
