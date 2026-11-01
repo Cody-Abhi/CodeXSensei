@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Eye, EyeOff, Shield, Loader2, Mail, Lock } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { AnimatedTabs } from "@/components/motion/animated-tabs";
 
 type AuthMode = "login" | "register";
 
@@ -189,29 +191,29 @@ export function AuthForm({
           : "Join CivicPulse to report civic issues"}
       </p>
 
-      {/* Tabs */}
-      <div className="auth-tabs-bg mt-5 flex gap-0 rounded-lg p-1">
-        {(["login", "register"] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => { setMode(m); setError(null); }}
-            className={cn(
-              "flex-1 rounded-md py-2 text-sm font-semibold transition-all duration-200",
-              mode === m
-                ? "bg-primary text-on-primary shadow-sm"
-                : "auth-text-slate hover:opacity-80",
-            )}
-          >
-            {m === "login" ? "Login" : "Register"}
-          </button>
-        ))}
-      </div>
+      {/* Tabs — animated sliding indicator */}
+      <AnimatedTabs
+        tabs={[
+          { id: "login", label: "Login" },
+          { id: "register", label: "Register" },
+        ]}
+        activeId={mode}
+        onTabChange={(id) => { setMode(id as AuthMode); setError(null); }}
+        className="mt-5"
+      />
 
-      {/* Form */}
+      {/* Form — animated content switch */}
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+        <AnimatePresence mode="wait">
         {mode === "register" && (
-          <div className="relative">
+          <motion.div
+            key="name-field"
+            className="relative"
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: "auto", marginBottom: 0 }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.25, ease: [0.2, 0.8, 0.2, 1] }}
+          >
             <input
               type="text"
               value={displayName}
@@ -221,8 +223,9 @@ export function AuthForm({
               className="auth-input"
               autoComplete="name"
             />
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         <div className="relative">
           <Mail className="auth-input-icon pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" size={18} />
@@ -287,22 +290,24 @@ export function AuthForm({
           </div>
         )}
 
-        <Button
-          type="submit"
-          disabled={loading || googleLoading}
-          className="h-12 w-full rounded-lg text-base font-semibold"
-        >
-          {loading ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              {mode === "login" ? "Signing In..." : "Creating Account..."}
-            </>
-          ) : mode === "login" ? (
-            "Sign In"
-          ) : (
-            "Create Account"
-          )}
-        </Button>
+        <motion.div whileTap={{ scale: 0.98 }} transition={{ duration: 0.1 }}>
+          <Button
+            type="submit"
+            disabled={loading || googleLoading}
+            className="h-12 w-full rounded-lg text-base font-semibold"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                {mode === "login" ? "Signing In..." : "Creating Account..."}
+              </>
+            ) : mode === "login" ? (
+              "Sign In"
+            ) : (
+              "Create Account"
+            )}
+          </Button>
+        </motion.div>
       </form>
 
       {/* Social sign-in */}

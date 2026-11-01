@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, useReducedMotion } from "motion/react";
 import {
   LayoutDashboard,
   FileText,
@@ -36,13 +37,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Settings", href: "/citizen/settings", icon: Settings },
 ];
 
-/**
- * Dark navy sidebar matching the reference dashboard layout.
- * Fixed on desktop; slides in on mobile via a drawer pattern.
- */
 export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const [darkMode, setDarkMode] = React.useState(false);
+  const prefersReduced = useReducedMotion();
 
   return (
     <aside
@@ -66,26 +64,49 @@ export function Sidebar({ className }: { className?: string }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
                 isActive
                   ? "text-white"
                   : "text-white/60 hover:text-white/90",
               )}
-              style={isActive ? { backgroundColor: "var(--cp-sidebar-active)" } : undefined}
             >
-              <Icon
-                icon={item.icon}
-                size={18}
-                className={isActive ? "text-white" : "text-white/50 group-hover:text-white/80"}
-              />
-              {item.label}
+              {isActive && (
+                prefersReduced ? (
+                  <span
+                    className="absolute inset-0 rounded-lg"
+                    style={{ backgroundColor: "var(--cp-sidebar-active)" }}
+                  />
+                ) : (
+                  <motion.span
+                    layoutId="sidebar-active"
+                    className="absolute inset-0 rounded-lg"
+                    style={{ backgroundColor: "var(--cp-sidebar-active)" }}
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )
+              )}
+              <span className="relative z-10 flex items-center gap-3">
+                <Icon
+                  icon={item.icon}
+                  size={18}
+                  className={cn(
+                    "transition-transform duration-200",
+                    isActive ? "text-white" : "text-white/50 group-hover:text-white/80",
+                    !isActive && "group-hover:scale-110",
+                  )}
+                />
+                {item.label}
+              </span>
               {item.badge != null && item.badge > 0 && (
-                <span
-                  className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold"
+                <motion.span
+                  className="relative z-10 ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold"
                   style={{ backgroundColor: "var(--cp-auth-notif-bg)", color: "var(--cp-auth-text-white)" }}
+                  initial={prefersReduced ? false : { scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 15, delay: 0.5 }}
                 >
                   {item.badge}
-                </span>
+                </motion.span>
               )}
             </Link>
           );
