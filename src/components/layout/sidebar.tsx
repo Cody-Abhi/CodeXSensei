@@ -100,7 +100,7 @@ export function Sidebar({ className }: { className?: string }) {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:text-white/90"
         >
           <Icon icon={darkMode ? Sun : Moon} size={18} className="text-white/50" />
-          {darkMode ? "Light Mode" : "Light Mode"}
+          {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
       </div>
     </aside>
