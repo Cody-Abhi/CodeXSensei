@@ -1,21 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Public_Sans, IBM_Plex_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { BRAND_PRIMARY_HEX } from "@/lib/brand";
 import "./globals.css";
-
-const publicSans = Public_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-public-sans",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["500"],
-  display: "swap",
-  variable: "--font-ibm-plex-mono",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -39,7 +26,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${publicSans.variable} ${ibmPlexMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -71,10 +71,10 @@
   --shadow-e2: var(--cp-shadow-2);
   --shadow-e3: var(--cp-shadow-3);
 
-  /* Typography — font CSS variables are injected by next/font in layout.tsx */
-  --font-sans: var(--font-public-sans), "Noto Sans", system-ui, -apple-system,
-    "Segoe UI", Roboto, sans-serif;
-  --font-mono: var(--font-ibm-plex-mono), ui-monospace, SFMono-Regular, Menlo,
+  /* Typography — Geist via next/font (geist package), wired in layout.tsx */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI",
+    Roboto, "Noto Sans", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
     monospace;
 }
 
@@ -103,6 +103,24 @@
   /* Numeric alignment for scores, metrics, tables. */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Restrained glassmorphism — ONLY for floating map controls, overlays and
+   selected nav elements (never full-site). Falls back to a solid surface where
+   backdrop-filter is unsupported. */
+@layer components {
+  .cp-glass {
+    background-color: var(--cp-surface);
+    border: 1px solid var(--cp-glass-border);
+    box-shadow: var(--cp-glass-shadow);
+  }
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .cp-glass {
+      background-color: var(--cp-glass-bg);
+      -webkit-backdrop-filter: blur(var(--cp-glass-blur)) saturate(140%);
+      backdrop-filter: blur(var(--cp-glass-blur)) saturate(140%);
+    }
   }
 }
 

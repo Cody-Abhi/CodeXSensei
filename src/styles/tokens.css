@@ -1,72 +1,80 @@
-/* CivicPulse "Survey Ledger" design tokens — PRD §15.1 / §15.3.
-   Semantic CSS variables only. Dark theme (P2) can be added later via
-   [data-theme="dark"] without touching components. */
+/* CivicPulse "Modern Civic Minimalism" design tokens.
+   Swiss editorial + enterprise-SaaS minimalism + restrained glassmorphism.
+   Semantic CSS variables only — components never use raw hex (§44). This
+   palette supersedes the PRD "Survey Ledger" tokens per owner direction
+   (recorded in docs/DECISIONS.md); contrast re-verified for WCAG 2.2 AA. */
 :root {
-  /* Brand */
-  --cp-primary: #1b3a8c;
-  --cp-primary-hover: #142d70;
-  --cp-primary-subtle: #e8edf8;
+  /* Brand — premium civic teal action; deep navy ink */
+  --cp-primary: #0f766e;
+  --cp-primary-hover: #0b5d56;
+  --cp-primary-subtle: #e6f1f0;
   --cp-on-primary: #ffffff;
-  --cp-secondary: #0b6e66;
-  --cp-secondary-subtle: #e3f2f0;
-  --cp-accent: #f2b233;
+  --cp-secondary: #172b36;
+  --cp-secondary-subtle: #e8eced;
+  --cp-accent: #ca8a04;
 
   /* Surfaces */
-  --cp-bg: #f4f6f9;
+  --cp-bg: #f5f8f7;
   --cp-surface: #ffffff;
   --cp-surface-elevated: #ffffff;
-  --cp-surface-sunken: #edf0f5;
+  --cp-surface-sunken: #edf2f1;
 
   /* Text */
-  --cp-text: #13203a;
-  --cp-text-secondary: #3a4762;
-  --cp-text-muted: #5e6a84;
+  --cp-text: #172b36;
+  --cp-text-secondary: #475569;
+  --cp-text-muted: #596579;
 
   /* Borders */
-  --cp-border: #d9dfea;
-  --cp-border-strong: #76829a;
+  --cp-border: #e3e9ea;
+  --cp-border-strong: #64748b;
 
   /* Status */
-  --cp-success: #17683f;
-  --cp-success-bg: #e6f4ec;
-  --cp-warning: #7a5208;
-  --cp-warning-bg: #fbf1db;
-  --cp-danger: #9b2318;
-  --cp-danger-bg: #fceae8;
-  --cp-info: #1d4ed8;
-  --cp-info-bg: #e8effd;
+  --cp-success: #15803d;
+  --cp-success-bg: #e8f6ee;
+  --cp-warning: #b45309;
+  --cp-warning-bg: #fbf0e0;
+  --cp-danger: #b91c1c;
+  --cp-danger-bg: #fcebeb;
+  --cp-info: #0369a1;
+  --cp-info-bg: #e7f1f8;
 
   /* Priority */
-  --cp-prio-critical-fg: #8f1d14;
-  --cp-prio-critical-bg: #fce9e7;
-  --cp-prio-critical-solid: #b42318;
-  --cp-prio-high-fg: #8a3a07;
-  --cp-prio-high-bg: #fdeee3;
-  --cp-prio-high-solid: #d9480f;
-  --cp-prio-medium-fg: #6e4a07;
-  --cp-prio-medium-bg: #fbf3dc;
-  --cp-prio-medium-solid: #c98a12;
-  --cp-prio-low-fg: #2f4a6b;
-  --cp-prio-low-bg: #e9eff6;
-  --cp-prio-low-solid: #5b7390;
+  --cp-prio-critical-fg: #b42318;
+  --cp-prio-critical-bg: #fcebea;
+  --cp-prio-critical-solid: #dc2626;
+  --cp-prio-high-fg: #9a4408;
+  --cp-prio-high-bg: #fbf0e0;
+  --cp-prio-high-solid: #ea580c;
+  --cp-prio-medium-fg: #845607;
+  --cp-prio-medium-bg: #fbf4de;
+  --cp-prio-medium-solid: #ca8a04;
+  --cp-prio-low-fg: #334e68;
+  --cp-prio-low-bg: #eaf0f4;
+  --cp-prio-low-solid: #64748b;
 
-  /* AI + demo */
-  --cp-ai-bg: #f1effb;
-  --cp-ai-border: #c9c2ee;
-  --cp-demo-bg: #eef1f4;
-  --cp-demo-fg: #3a4762;
+  /* AI content (subtle indigo keeps "AI = distinct" legible) + demo */
+  --cp-ai-bg: #eef0fb;
+  --cp-ai-border: #d3d8f0;
+  --cp-demo-bg: #ecf1f0;
+  --cp-demo-fg: #475569;
 
-  /* Radii */
+  /* Glassmorphism — only for floating map controls, overlays, selected nav */
+  --cp-glass-bg: rgba(255, 255, 255, 0.72);
+  --cp-glass-border: rgba(23, 43, 54, 0.08);
+  --cp-glass-shadow: 0 8px 32px rgba(23, 43, 54, 0.12);
+  --cp-glass-blur: 12px;
+
+  /* Radii — crisp SaaS hierarchy */
   --cp-radius-xs: 4px;
   --cp-radius-sm: 6px;
   --cp-radius-md: 10px;
   --cp-radius-lg: 14px;
   --cp-radius-full: 9999px;
 
-  /* Shadows */
-  --cp-shadow-1: 0 1px 2px rgba(19, 32, 58, 0.06), 0 1px 1px rgba(19, 32, 58, 0.04);
-  --cp-shadow-2: 0 4px 12px rgba(19, 32, 58, 0.08), 0 2px 4px rgba(19, 32, 58, 0.05);
-  --cp-shadow-3: 0 16px 40px rgba(19, 32, 58, 0.14), 0 4px 10px rgba(19, 32, 58, 0.06);
+  /* Shadows — navy-tinted, restrained */
+  --cp-shadow-1: 0 1px 2px rgba(23, 43, 54, 0.05), 0 1px 1px rgba(23, 43, 54, 0.03);
+  --cp-shadow-2: 0 4px 12px rgba(23, 43, 54, 0.06), 0 2px 4px rgba(23, 43, 54, 0.04);
+  --cp-shadow-3: 0 16px 40px rgba(23, 43, 54, 0.1), 0 4px 10px rgba(23, 43, 54, 0.05);
 
   /* Motion */
   --cp-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -75,7 +83,7 @@
   --cp-dur-base: 180ms;
   --cp-dur-slow: 260ms;
 
-  /* Z-index scale (§15.3) */
+  /* Z-index scale */
   --cp-z-sticky: 10;
   --cp-z-sidebar: 20;
   --cp-z-dropdown: 30;
